@@ -9,43 +9,43 @@ const jsonParser = express.json()
 
 
 recipesRouter
-.route('/recipes')
-.get((req, res, next) => {
-    const knexInstance = req.app.get('db')
-    RecipesService.getAllRecipes(knexInstance)
-        .then(recipes => {
-            res.json(recipes)
-        })
-        .catch(next)
-})
-.post(jsonParser,(req, res, next) => {
-    // get the data
-    const { title, ingredients, instructions, meal_type, image_url } = req.body
-    const newRecipe = { title, ingredients, instructions, meal_type, image_url }
-    const knexInstance = req.app.get('db')
-
-    for (const [key, value] of Object.entries(newRecipe)) {
-        if (value == null) {
-            return res.status(400).json({
-                error: { message: `Missing '${key}' in request body`}
+    .route('/')
+    .get((req, res, next) => {
+        const knexInstance = req.app.get('db')
+        RecipesService.getAllRecipes(knexInstance)
+            .then(recipes => {
+                res.json(recipes)
             })
-        }
-    }
+            .catch(next)
+    })
+    .post(jsonParser,(req, res, next) => {
+        // get the data
+        const { title, ingredients, instructions, meal_type, image_url } = req.body
+        const newRecipe = { title, ingredients, instructions, meal_type, image_url }
+        const knexInstance = req.app.get('db')
 
-    RecipesService.insertRecipe(knexInstance, newRecipe)
-        .then(recipe => {
-            res
-                .status(201)
-                .location(`/recipes/${recipe.id}`)
-                .json(recipe)
-        })
-        .catch(next)
-    
-    
-})
+        for (const [key, value] of Object.entries(newRecipe)) {
+            if (value == null) {
+                return res.status(400).json({
+                    error: { message: `Missing '${key}' in request body`}
+                })
+            }
+        }
+
+        RecipesService.insertRecipe(knexInstance, newRecipe)
+            .then(recipe => {
+                res
+                    .status(201)
+                    .location(`/recipes/${recipe.id}`)
+                    .json(recipe)
+            })
+            .catch(next)
+        
+        
+    })
 
 recipesRouter
-    .route('/recipes/:id')
+    .route('/:id')
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
         RecipesService.getById(knexInstance, req.params.id)
@@ -58,13 +58,6 @@ recipesRouter
                 res.json(recipe)
             })
             .catch(next)
-
-        // if (!recipe){
-        //     logger.error(`Recipe with id ${id} not found`)
-        //     return res
-        //         .status(404)
-        //         .send('Recipe Not Found')
-        // }
     })
     .delete((req, res) => {
         const { id } = req.params;

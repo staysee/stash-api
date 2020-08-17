@@ -18,7 +18,7 @@ app.use(helmet())
 app.use(cors())
 app.use(express.json())
 
-app.use(recipesRouter)
+app.use('/recipes', recipesRouter)
 
 
 app.get('/', (req, res) => {

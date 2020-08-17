@@ -77,7 +77,7 @@ describe.only('Recipes Endpoints', function() {
         })
     })
 
-    describe.only(`POST /recipes`, () => {
+    describe(`POST /recipes`, () => {
         it('creates a recipe, responding with 201 and the new recipe', () => {
             this.retries(3)
             const newRecipe = {
