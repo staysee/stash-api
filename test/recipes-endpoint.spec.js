@@ -23,6 +23,14 @@ describe.only('Recipes Endpoints', function() {
     afterEach('cleanup', () => db('recipes').truncate())
 
     describe(`GET /recipes`, () => {
+        context('Given no recipes', () => {
+            it('responds with 200 and an empty list', () => {
+                return supertest(app)
+                    .get('/recipes')
+                    .expect(200, [])
+            })
+        })
+
         context('Given there are recipes in the database', () => {
             const testRecipes = makeRecipesArray()
     
@@ -41,6 +49,15 @@ describe.only('Recipes Endpoints', function() {
     })
 
     describe(`GET /recipes/:id`, () => {
+        context('Given no recipes', () => {
+            it('responds with 404', () => {
+                const recipeId = 123456
+                return supertest(app)
+                    .get(`/recipes/${recipeId}`)
+                    .expect(404, { error: { message: `Recipe doesn't exist` } })
+            })
+        })
+
         context(`Given there are recipes in the database`, () => {
             const testRecipes = makeRecipesArray()
 
@@ -60,4 +77,38 @@ describe.only('Recipes Endpoints', function() {
         })
     })
 
+    describe.only(`POST /recipes`, () => {
+        it('creates a recipe, responding with 201 and the new recipe', () => {
+            this.retries(3)
+            const newRecipe = {
+                title: 'Test new recipe',
+                ingredients: 'Test ingredients',
+                instructions: 'Test instructions',
+                meal_type: 'Breakfast',
+                image_url: 'https://via.placeholder.com/100'
+            }
+            return supertest(app)
+                .post('/recipes')
+                .send(newRecipe)
+                .expect(201)
+                .expect( res => {
+                    expect(res.body.title).to.eql(newRecipe.title)
+                    expect(res.body.ingredients).to.eql(newRecipe.ingredients)
+                    expect(res.body.instructions).to.eql(newRecipe.instructions)
+                    expect(res.body.meal_type).to.eql(newRecipe.meal_type)
+                    expect(res.body.image_url).to.eql(newRecipe.image_url)
+                    expect(res.body).to.have.property('id')
+                    expect(res.headers.location).to.eql(`/recipes/${res.body.id}`)
+                    const expected = new Date().toLocaleString()
+                    const actual = new Date(res.body.date_created).toLocaleString()
+                    expect(actual).to.eql(expected)
+                })
+                //make second request to the GET /recipe/:id
+                .then(postRes =>
+                    supertest(app)
+                    .get(`/recipes/${postRes.body.id}`)
+                    .expect(postRes.body)
+                )
+        })
+    })
 })

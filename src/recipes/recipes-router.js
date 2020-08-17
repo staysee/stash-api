@@ -5,69 +5,44 @@ const logger = require('../logger')
 const RecipesService = require('./recipes-service')
 
 const recipesRouter = express.Router()
-const bodyParser = express.json()
+const jsonParser = express.json()
 
 
 recipesRouter
 .route('/recipes')
 .get((req, res, next) => {
-        const knexInstance = req.app.get('db')
-        RecipesService.getAllRecipes(knexInstance)
-            .then(recipes => {
-                res.json(recipes)
+    const knexInstance = req.app.get('db')
+    RecipesService.getAllRecipes(knexInstance)
+        .then(recipes => {
+            res.json(recipes)
+        })
+        .catch(next)
+})
+.post(jsonParser,(req, res, next) => {
+    // get the data
+    const { title, ingredients, instructions, meal_type, image_url } = req.body
+    const newRecipe = { title, ingredients, instructions, meal_type, image_url }
+    const knexInstance = req.app.get('db')
+
+    for (const [key, value] of Object.entries(newRecipe)) {
+        if (value == null) {
+            return res.status(400).json({
+                error: { message: `Missing '${key}' in request body`}
             })
-            .catch(next)
-    })
-    .post(bodyParser, (req, res) => {
-        // get the data
-        const { title, ingredients, instructions, type, imageURL } = req.body
-        
-        if (!title) {
-            return res
-                .status(400)
-                .send('Title required');
         }
-        if (!ingredients) {
-            return res
-                .status(400)
-                .send('Ingredients required');
-        }
-        if (!instructions) {
-            return res
-                .status(400)
-                .send('Instructions required');
-        }
-        if (!type) {
-            return res
-                .status(400)
-                .send('Type required');
-        }
-        if (!imageURL) {
-            return res
-                .status(400)
-                .send('Image URL required');
-        }
+    }
+
+    RecipesService.insertRecipe(knexInstance, newRecipe)
+        .then(recipe => {
+            res
+                .status(201)
+                .location(`/recipes/${recipe.id}`)
+                .json(recipe)
+        })
+        .catch(next)
     
-        // if validations are passed, get an id
-        const id = uuid()
-        const newRecipe = {
-            id,
-            title,
-            ingredients,
-            instructions,
-            imageURL
-        }
     
-        recipes.push(newRecipe)
-    
-        // log the recipe
-        logger.info(`Recipe created with id ${id}`)
-        // send the response
-        res
-            .status(201)
-            .location(`http://localhost:8000/recipes/${id}`)
-            .json(newRecipe)
-    })
+})
 
 recipesRouter
     .route('/recipes/:id')
@@ -75,6 +50,11 @@ recipesRouter
         const knexInstance = req.app.get('db')
         RecipesService.getById(knexInstance, req.params.id)
             .then(recipe => {
+                if (!recipe) {
+                    return res.status(404).json({
+                        error: { message: `Recipe doesn't exist` }
+                    })
+                }
                 res.json(recipe)
             })
             .catch(next)
