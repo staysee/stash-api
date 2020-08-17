@@ -3,6 +3,12 @@
 This is the api for STASH.
 Created using the express-boilerplate.
 
+# Migrations
+Run Migrations: `npm run migrate`
+
+# Seed Database
+`psql -U {username} -d {database name} -f {path to seed file}`
+
 
 ## Scripts
 
