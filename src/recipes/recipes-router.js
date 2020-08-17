@@ -1,16 +1,22 @@
 const express = require('express')
 const { v4: uuid } = require('uuid')
 const logger = require('../logger')
-const { recipes } = require('../store')
+// const { recipes } = require('../store')
+const RecipesService = require('./recipes-service')
 
 const recipesRouter = express.Router()
 const bodyParser = express.json()
 
+
 recipesRouter
-    .route('/recipes')
-    .get((req, res) => {
-        //return list of recipes
-        res.json(recipes)
+.route('/recipes')
+.get((req, res, next) => {
+        const knexInstance = req.app.get('db')
+        RecipesService.getAllRecipes(knexInstance)
+            .then(recipes => {
+                res.json(recipes)
+            })
+            .catch(next)
     })
     .post(bodyParser, (req, res) => {
         // get the data
@@ -65,17 +71,20 @@ recipesRouter
 
 recipesRouter
     .route('/recipes/:id')
-    .get((req, res) => {
-        const { id } = req.params
-        const recipe = recipes.find( recipe => recipe.id === id)
+    .get((req, res, next) => {
+        const knexInstance = req.app.get('db')
+        RecipesService.getById(knexInstance, req.params.id)
+            .then(recipe => {
+                res.json(recipe)
+            })
+            .catch(next)
 
-        if (!recipe){
-            logger.error(`Recipe with id ${id} not found`)
-            return res
-                .status(404)
-                .send('Recipe Not Found')
-        }
-        res.json(recipe)
+        // if (!recipe){
+        //     logger.error(`Recipe with id ${id} not found`)
+        //     return res
+        //         .status(404)
+        //         .send('Recipe Not Found')
+        // }
     })
     .delete((req, res) => {
         const { id } = req.params;
