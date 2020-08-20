@@ -4,7 +4,7 @@ const app = require('../src/app')
 const supertest = require('supertest')
 const { makeRecipesArray } = require('./recipes.fixtures')
 
-describe.only('Recipes Endpoints', function() {
+describe('Recipes Endpoints', function() {
     let db
 
     //create knex instance to connect to test DB
@@ -48,7 +48,7 @@ describe.only('Recipes Endpoints', function() {
         })
     })
 
-    describe(`GET /recipes/:id`, () => {
+    describe.only(`GET /recipes/:id`, () => {
         context('Given no recipes', () => {
             it('responds with 404', () => {
                 const recipeId = 123456
@@ -73,6 +73,35 @@ describe.only('Recipes Endpoints', function() {
                 return supertest(app)
                     .get(`/recipes/${recipeId}`)
                     .expect(200, expectedRecipe)
+            })
+        })
+
+        context(`Given an XSS attack recipe`, () => {
+            const maliciousRecipe = {
+                id: 911,
+                title: 'Bad title <script>alert("xss");</script>',
+                ingredients: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
+                instructions: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
+                meal_type: 'Breakfast',
+                image_url: 'https://url.to.file.which/does-not.exist'
+            }
+
+            beforeEach('insert malicious recipe', () => {
+                return db
+                    .into('recipes')
+                    .insert([maliciousRecipe])
+            })
+
+            it ('removes XSS attack content', () => {
+                return supertest(app)
+                    .get(`/recipes/${maliciousRecipe.id}`)
+                    .expect(200)
+                    .expect(res => {
+                        expect(res.body.title).to.eql('Bad title &lt;script&gt;alert(\"xss\");&lt;/script&gt;')
+                        expect(res.body.ingredients).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`)
+                        expect(res.body.instructions).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`)
+
+                    })
             })
         })
     })
@@ -109,6 +138,29 @@ describe.only('Recipes Endpoints', function() {
                     .get(`/recipes/${postRes.body.id}`)
                     .expect(postRes.body)
                 )
+        })
+
+        const requiredFields = ['title', 'ingredients', 'instructions', 'meal_type', 'image_url']
+        
+        requiredFields.forEach(field => {
+            const newRecipe = {
+                title: 'Test new recipe',
+                instructions: 'Test instructions',
+                ingredients: 'Test ingredients',
+                meal_type: 'Breakfast',
+                image_url: 'https://via.placeholder.com/100'
+            }
+
+            it(`responds with 400 and an error message when the 'title' is missing`, () => {
+                delete newRecipe[field]
+    
+                return supertest(app)
+                    .post('/recipes')
+                    .send(newRecipe)
+                    .expect(400, {
+                        error: { message: `Missing '${field}' in request body` }
+                    })
+            })
         })
     })
 })
