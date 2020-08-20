@@ -48,7 +48,7 @@ describe('Recipes Endpoints', function() {
         })
     })
 
-    describe.only(`GET /recipes/:id`, () => {
+    describe(`GET /recipes/:id`, () => {
         context('Given no recipes', () => {
             it('responds with 404', () => {
                 const recipeId = 123456
@@ -100,7 +100,6 @@ describe('Recipes Endpoints', function() {
                         expect(res.body.title).to.eql('Bad title &lt;script&gt;alert(\"xss\");&lt;/script&gt;')
                         expect(res.body.ingredients).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`)
                         expect(res.body.instructions).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`)
-
                     })
             })
         })
@@ -160,6 +159,39 @@ describe('Recipes Endpoints', function() {
                     .expect(400, {
                         error: { message: `Missing '${field}' in request body` }
                     })
+            })
+        })
+    })
+
+    describe.only(`DELETE /recipes/:id`, () => {
+        context('Given no recipes', () => {
+            it(`responds with 404`, () => {
+                const recipeId = 123456
+                return supertest(app)
+                    .delete(`/recipes/${recipeId}`)
+                    .expect(404, { error: { message: `Recipe doesn't exist` } })
+            })
+        })
+        context('Given there are recipes in the database', () => {
+            const testRecipes = makeRecipesArray()
+
+            beforeEach('insert recipes', () => {
+                return db
+                    .into('recipes')
+                    .insert(testRecipes)
+            })
+
+            it('responds with 204 and removes the recipes', () => {
+                const idToRemove = 2
+                const expectedRecipes = testRecipes.filter(recipe => recipe.id !== idToRemove)
+                return supertest(app)
+                    .delete(`/recipes/${idToRemove}`)
+                    .expect(204)
+                    .then(res =>
+                        supertest(app)
+                        .get(`/recipes`)
+                        .expect(expectedRecipes)
+                    )
             })
         })
     })

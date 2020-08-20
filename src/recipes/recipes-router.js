@@ -1,7 +1,7 @@
 const express = require('express')
 const { v4: uuid } = require('uuid')
 const logger = require('../logger')
-// const { recipes } = require('../store')
+const xss = require('xss')
 const RecipesService = require('./recipes-service')
 
 const recipesRouter = express.Router()
@@ -46,32 +46,38 @@ recipesRouter
 
 recipesRouter
     .route('/:id')
-    .get((req, res, next) => {
+    .all((req, res, next) => {
         const knexInstance = req.app.get('db')
         RecipesService.getById(knexInstance, req.params.id)
             .then(recipe => {
                 if (!recipe) {
                     return res.status(404).json({
-                        error: { message: `Recipe doesn't exist` }
+                        error: { message: `Recipe doesn't exist`}
                     })
                 }
-                res.json(recipe)
+                res.recipe = recipe // save the recipe for the next middleware
+                next()
             })
             .catch(next)
     })
-    .delete((req, res) => {
-        const { id } = req.params;
-
-        const recipeIndex = recipes.findIndex( recipe => recipe.id == id)
-
-        if (recipeIndex === -1){
-            logger.error(`Recipe with id ${id} not found.`)
-            return res
-                .status(404)
-                .send('Not Found')
-        }
-
-        recipes.splice(recipeIndex, 1)
+    .get((req, res, next) => {
+        res.json({
+            id: recipe.id,
+            title: xss(recipe.title),
+            ingredients: xss(recipe.ingredients),
+            instructions: xss(recipe.instructions),
+            meal_type: recipe.meal_type,
+            image_url: recipe.image_url
+            // date_created: recipe.date_created
+        })
+    })
+    .delete((req, res, next) => {
+        const knexInstance = req.app.get('db')
+        RecipesService.deleteRecipe(knexInstance, req.params.id)
+            .then( () => {
+                res.status(204).end()
+            })
+            .catch(next)
 
         logger.info(`Recipe with id ${id} deleted.`)
         res
