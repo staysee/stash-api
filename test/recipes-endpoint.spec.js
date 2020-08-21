@@ -163,7 +163,7 @@ describe('Recipes Endpoints', function() {
         })
     })
 
-    describe.only(`DELETE /recipes/:id`, () => {
+    describe(`DELETE /recipes/:id`, () => {
         context('Given no recipes', () => {
             it(`responds with 404`, () => {
                 const recipeId = 123456

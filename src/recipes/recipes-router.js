@@ -61,28 +61,27 @@ recipesRouter
             .catch(next)
     })
     .get((req, res, next) => {
+        const { recipe } = res;
         res.json({
             id: recipe.id,
             title: xss(recipe.title),
             ingredients: xss(recipe.ingredients),
             instructions: xss(recipe.instructions),
             meal_type: recipe.meal_type,
-            image_url: recipe.image_url
-            // date_created: recipe.date_created
+            image_url: recipe.image_url,
+            date_created: recipe.date_created
         })
     })
     .delete((req, res, next) => {
         const knexInstance = req.app.get('db')
-        RecipesService.deleteRecipe(knexInstance, req.params.id)
+        return RecipesService.deleteRecipe(knexInstance, req.params.id)
             .then( () => {
-                res.status(204).end()
+                return res.status(204).json({ message: `Recipe with id ${req.params.id} was deleted.`})
             })
             .catch(next)
 
         logger.info(`Recipe with id ${id} deleted.`)
-        res
-            .status(204)
-            .end()
+
     })
 
 module.exports = recipesRouter

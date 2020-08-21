@@ -20,12 +20,12 @@ const RecipesService = {
     },
     deleteRecipe(knex, id) {
         return knex('recipes')
-            .where({ id })
+            .where('id', id)
             .delete()
     },
     updateRecipe(knex, id, newRecipeFields) {
         return knex('recipes')
-            .where({ id })
+            .where('id', id)
             .update(newRecipeFields)
     }
 }
