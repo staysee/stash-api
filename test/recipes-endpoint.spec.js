@@ -22,11 +22,11 @@ describe('Recipes Endpoints', function() {
 
     afterEach('cleanup', () => db('recipes').truncate())
 
-    describe(`GET /recipes`, () => {
+    describe(`GET /api/recipes`, () => {
         context('Given no recipes', () => {
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
-                    .get('/recipes')
+                    .get('/api/recipes')
                     .expect(200, [])
             })
         })
@@ -42,18 +42,18 @@ describe('Recipes Endpoints', function() {
     
             it('responds with 200 and all of the recipes', () => {
                 return supertest(app)
-                    .get('/recipes')
+                    .get('/api/recipes')
                     .expect(200, testRecipes)
             })
         })
     })
 
-    describe(`GET /recipes/:id`, () => {
+    describe(`GET /api/recipes/:id`, () => {
         context('Given no recipes', () => {
             it('responds with 404', () => {
                 const recipeId = 123456
                 return supertest(app)
-                    .get(`/recipes/${recipeId}`)
+                    .get(`/api/recipes/${recipeId}`)
                     .expect(404, { error: { message: `Recipe doesn't exist` } })
             })
         })
@@ -71,7 +71,7 @@ describe('Recipes Endpoints', function() {
                 const recipeId = 2
                 const expectedRecipe = testRecipes[recipeId - 1]
                 return supertest(app)
-                    .get(`/recipes/${recipeId}`)
+                    .get(`/api/recipes/${recipeId}`)
                     .expect(200, expectedRecipe)
             })
         })
@@ -94,7 +94,7 @@ describe('Recipes Endpoints', function() {
 
             it ('removes XSS attack content', () => {
                 return supertest(app)
-                    .get(`/recipes/${maliciousRecipe.id}`)
+                    .get(`/api/recipes/${maliciousRecipe.id}`)
                     .expect(200)
                     .expect(res => {
                         expect(res.body.title).to.eql('Bad title &lt;script&gt;alert(\"xss\");&lt;/script&gt;')
@@ -105,7 +105,7 @@ describe('Recipes Endpoints', function() {
         })
     })
 
-    describe(`POST /recipes`, () => {
+    describe(`POST /api/recipes`, () => {
         it('creates a recipe, responding with 201 and the new recipe', () => {
             this.retries(3)
             const newRecipe = {
@@ -116,7 +116,7 @@ describe('Recipes Endpoints', function() {
                 image_url: 'https://via.placeholder.com/100'
             }
             return supertest(app)
-                .post('/recipes')
+                .post('/api/recipes')
                 .send(newRecipe)
                 .expect(201)
                 .expect( res => {
@@ -126,7 +126,7 @@ describe('Recipes Endpoints', function() {
                     expect(res.body.meal_type).to.eql(newRecipe.meal_type)
                     expect(res.body.image_url).to.eql(newRecipe.image_url)
                     expect(res.body).to.have.property('id')
-                    expect(res.headers.location).to.eql(`/recipes/${res.body.id}`)
+                    expect(res.headers.location).to.eql(`/api/recipes/${res.body.id}`)
                     const expected = new Date().toLocaleString()
                     const actual = new Date(res.body.date_created).toLocaleString()
                     expect(actual).to.eql(expected)
@@ -134,7 +134,7 @@ describe('Recipes Endpoints', function() {
                 //make second request to the GET /recipe/:id
                 .then(postRes =>
                     supertest(app)
-                    .get(`/recipes/${postRes.body.id}`)
+                    .get(`/api/recipes/${postRes.body.id}`)
                     .expect(postRes.body)
                 )
         })
@@ -154,7 +154,7 @@ describe('Recipes Endpoints', function() {
                 delete newRecipe[field]
     
                 return supertest(app)
-                    .post('/recipes')
+                    .post('/api/recipes')
                     .send(newRecipe)
                     .expect(400, {
                         error: { message: `Missing '${field}' in request body` }
@@ -163,12 +163,12 @@ describe('Recipes Endpoints', function() {
         })
     })
 
-    describe(`DELETE /recipes/:id`, () => {
+    describe(`DELETE /api/recipes/:id`, () => {
         context('Given no recipes', () => {
             it(`responds with 404`, () => {
                 const recipeId = 123456
                 return supertest(app)
-                    .delete(`/recipes/${recipeId}`)
+                    .delete(`/api/recipes/${recipeId}`)
                     .expect(404, { error: { message: `Recipe doesn't exist` } })
             })
         })
@@ -185,12 +185,93 @@ describe('Recipes Endpoints', function() {
                 const idToRemove = 2
                 const expectedRecipes = testRecipes.filter(recipe => recipe.id !== idToRemove)
                 return supertest(app)
-                    .delete(`/recipes/${idToRemove}`)
+                    .delete(`/api/recipes/${idToRemove}`)
                     .expect(204)
                     .then(res =>
                         supertest(app)
-                        .get(`/recipes`)
+                        .get(`/api/recipes`)
                         .expect(expectedRecipes)
+                    )
+            })
+        })
+    })
+
+    describe.only(`PATCH /api/recipes/:id`, () => {
+        context(`Given no recipes`, () => {
+            it('responds with 404', () => {
+                const recipeId = 123456
+                return supertest(app)
+                    .patch(`/api/recipes/${recipeId}`)
+                    .expect(404, { 
+                        error: { message: `Recipe doesn't exist` }
+                    })
+            })
+        })
+
+        context('Given there are articles in the database', () => {
+            const testRecipes = makeRecipesArray()
+
+            beforeEach('insert recipes', () => {
+                return db
+                    .into('recipes')
+                    .insert(testRecipes)
+            })
+
+            it('responds with 204 and updates the recipe', () => {
+                const idToUpdate = 2
+                const updateRecipe = {
+                    title: 'updated recipe title',
+                    ingredients: 'New ingredients',
+                    instructions: 'Updated instructions',
+                    meal_type: 'Lunch',
+                    image_url: 'https://via.placeholder.com/100',
+                }
+                const expectedRecipe = {
+                    ...testRecipes[idToUpdate - 1],
+                    ...updateRecipe
+                }
+                return supertest(app)
+                    .patch(`/api/recipes/${idToUpdate}`)
+                    .send(updateRecipe)
+                    .expect(204)
+                    .then(res =>
+                        supertest(app)
+                            .get(`/api/recipes/${idToUpdate}`)
+                            .expect(expectedRecipe)
+                    )
+            })
+
+            it(`responds with 400 with no required fields supplied`, () => {
+                const idToUpdate = 2
+                return supertest(app)
+                    .patch(`/api/recipes/${idToUpdate}`)
+                    .send({ irrelevantField: 'foo' })
+                    .expect(400, {
+                        error: { message: `Request body must contain either 'title', 'ingredients', 'instructions', 'image_url'`}
+                    })
+            })
+
+            it(`responds with 204 when updating only a subset of fields`, () => {
+                const idToUpdate = 2
+                const updateRecipe = {
+                    title: `updated recipe title`
+                }
+                const expectedRecipe = {
+                    ...testRecipes[idToUpdate - 1],
+                    ...updateRecipe
+                }
+
+                return supertest(app)
+                    .patch(`/api/recipes/${idToUpdate}`)
+                    .send({
+                        ...updateRecipe,
+                        fieldToIgnore: 'should not be in GET response'
+                    })
+                    .expect(204)
+                    .then(res =>
+                        supertest(app)
+                            .get(`/api/recipes/${idToUpdate}`)
+                            .expect(expectedRecipe)
                     )
             })
         })

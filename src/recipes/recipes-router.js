@@ -1,8 +1,10 @@
+const path = require('path')
 const express = require('express')
 const { v4: uuid } = require('uuid')
 const logger = require('../logger')
 const xss = require('xss')
 const RecipesService = require('./recipes-service')
+const { end } = require('../logger')
 
 const recipesRouter = express.Router()
 const jsonParser = express.json()
@@ -36,7 +38,7 @@ recipesRouter
             .then(recipe => {
                 res
                     .status(201)
-                    .location(`/recipes/${recipe.id}`)
+                    .location(path.posix.join(req.originalUrl + `/${recipe.id}`))
                     .json(recipe)
             })
             .catch(next)
@@ -82,6 +84,26 @@ recipesRouter
 
         logger.info(`Recipe with id ${id} deleted.`)
 
+    })
+    .patch(jsonParser, (req, res, next) => {
+        const { title, ingredients, instructions, meal_type, image_url } = req.body
+        const recipeToUpdate = { title, ingredients, instructions, meal_type, image_url }
+        const knexInstance = req.app.get('db')
+
+        const numberOfValues = Object.values(recipeToUpdate).filter(Boolean).length
+        if (numberOfValues === 0) {
+            return res.status(400).json({
+                error: {
+                    message: `Request body must contain either 'title', 'ingredients', 'instructions', 'image_url'`
+                }
+            })
+        }
+
+        RecipesService.updateRecipe(knexInstance, req.params.id, recipeToUpdate)
+            .then(numRowsAffected => {
+                res.status(204).end()
+            })
+            .catch(next)
     })
 
 module.exports = recipesRouter
