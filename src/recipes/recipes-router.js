@@ -9,6 +9,15 @@ const { end } = require('../logger')
 const recipesRouter = express.Router()
 const jsonParser = express.json()
 
+const serializeRecipe = recipe => ({
+    id: recipe.id,
+    title: xss(recipe.title),
+    ingredients: xss(recipe.ingredients),
+    instructions: xss(recipe.instructions),
+    meal_type: recipe.meal_type,
+    image_url: recipe.image_url,
+    date_created: recipe.date_created
+})
 
 recipesRouter
     .route('/')
@@ -16,7 +25,7 @@ recipesRouter
         const knexInstance = req.app.get('db')
         RecipesService.getAllRecipes(knexInstance)
             .then(recipes => {
-                res.json(recipes)
+                res.json(recipes.map(serializeRecipe))
             })
             .catch(next)
     })
@@ -39,7 +48,7 @@ recipesRouter
                 res
                     .status(201)
                     .location(path.posix.join(req.originalUrl + `/${recipe.id}`))
-                    .json(recipe)
+                    .json(serializeRecipe(recipe))
             })
             .catch(next)
         
@@ -64,15 +73,7 @@ recipesRouter
     })
     .get((req, res, next) => {
         const { recipe } = res;
-        res.json({
-            id: recipe.id,
-            title: xss(recipe.title),
-            ingredients: xss(recipe.ingredients),
-            instructions: xss(recipe.instructions),
-            meal_type: recipe.meal_type,
-            image_url: recipe.image_url,
-            date_created: recipe.date_created
-        })
+        res.json(serializeRecipe(recipe))
     })
     .delete((req, res, next) => {
         const knexInstance = req.app.get('db')

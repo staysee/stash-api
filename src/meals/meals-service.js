@@ -2,7 +2,7 @@ const MealsService = {
     getAllMeals(knex) {
         return knex.select('*').from('meals')
     },
-    insertMeals(knex, newMeal) {
+    insertMeal(knex, newMeal) {
         return knex
             .insert(newMeal)
             .into('meals')
@@ -29,3 +29,5 @@ const MealsService = {
         .update(newMealFields)
     }
 }
+
+module.exports = MealsService
