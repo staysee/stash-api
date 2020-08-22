@@ -1,0 +1,4 @@
+ALTER TABLE recipes
+    DROP COLUMN author;
+
+DROP TABLE IF EXISTS users;
