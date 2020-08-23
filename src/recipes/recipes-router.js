@@ -16,7 +16,8 @@ const serializeRecipe = recipe => ({
     instructions: xss(recipe.instructions),
     meal_type: recipe.meal_type,
     image_url: recipe.image_url,
-    date_created: recipe.date_created
+    date_created: recipe.date_created,
+    author: recipe.author
 })
 
 recipesRouter
@@ -31,7 +32,7 @@ recipesRouter
     })
     .post(jsonParser,(req, res, next) => {
         // get the data
-        const { title, ingredients, instructions, meal_type, image_url } = req.body
+        const { title, ingredients, instructions, meal_type, image_url, author } = req.body
         const newRecipe = { title, ingredients, instructions, meal_type, image_url }
         const knexInstance = req.app.get('db')
 
@@ -42,6 +43,8 @@ recipesRouter
                 })
             }
         }
+
+        newRecipe.author = author
 
         RecipesService.insertRecipe(knexInstance, newRecipe)
             .then(recipe => {

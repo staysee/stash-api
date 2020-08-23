@@ -2,7 +2,8 @@ const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
 const supertest = require('supertest')
-const { makeRecipesArray } = require('./recipes.fixtures')
+const { makeRecipesArray, makeMaliciousRecipe } = require('./recipes.fixtures')
+const { makeUsersArray } = require('./users.fixtures')
 
 describe('Recipes Endpoints', function() {
     let db
@@ -18,9 +19,9 @@ describe('Recipes Endpoints', function() {
 
     after('disconnect from db', () => db.destroy())
 
-    before('clean the table', () => db('recipes').truncate())
+    before('clean the table', () => db.raw('TRUNCATE recipes, users, meals RESTART IDENTITY CASCADE'))
 
-    afterEach('cleanup', () => db('recipes').truncate())
+    afterEach('cleanup', () => db.raw('TRUNCATE recipes, users, meals RESTART IDENTITY CASCADE'))
 
     describe(`GET /api/recipes`, () => {
         context('Given no recipes', () => {
@@ -32,18 +33,54 @@ describe('Recipes Endpoints', function() {
         })
 
         context('Given there are recipes in the database', () => {
+            const testUsers = makeUsersArray()
             const testRecipes = makeRecipesArray()
     
             beforeEach('insert recipes', () => {
                 return db
-                    .into('recipes')
-                    .insert(testRecipes)
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert(testRecipes)
+                    })
             })
     
             it('responds with 200 and all of the recipes', () => {
                 return supertest(app)
                     .get('/api/recipes')
                     .expect(200, testRecipes)
+            })
+        })
+
+        context(`Given an XSS attack recipe`, () => {
+            const testUsers = makeUsersArray()
+            const { maliciousRecipe, expectedRecipe } = makeMaliciousRecipe()
+
+            beforeEach('insert malicious recipe', () => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert([ maliciousRecipe ])
+                    })
+            })
+
+            it('removes XSS attack content', () => {
+                return supertest(app)
+                    .get(`/api/recipes`)
+                    .expect(200)
+                    .expect(res => {
+                        expect(res.body[0].title).to.eql(expectedRecipe.title)
+                        expect(res.body[0].ingredients).to.eql(expectedRecipe.ingredients)
+                        expect(res.body[0].instructions).to.eql(expectedRecipe.instructions)
+                        expect(res.body[0].image_url).to.eql(expectedRecipe.image_url)
+                        
+
+                    })
             })
         })
     })
@@ -59,12 +96,18 @@ describe('Recipes Endpoints', function() {
         })
 
         context(`Given there are recipes in the database`, () => {
+            const testUsers = makeUsersArray()
             const testRecipes = makeRecipesArray()
 
             beforeEach('insert recipes', () => {
                 return db
-                    .into('recipes')
-                    .insert(testRecipes)
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert(testRecipes)
+                    })
             })
 
             it('responds with 200 and the specified recipe', () => {
@@ -77,19 +120,18 @@ describe('Recipes Endpoints', function() {
         })
 
         context(`Given an XSS attack recipe`, () => {
-            const maliciousRecipe = {
-                id: 911,
-                title: 'Bad title <script>alert("xss");</script>',
-                ingredients: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
-                instructions: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
-                meal_type: 'Breakfast',
-                image_url: 'https://url.to.file.which/does-not.exist'
-            }
+            const testUsers = makeUsersArray()
+            const { maliciousRecipe, expectedRecipe } = makeMaliciousRecipe()
 
             beforeEach('insert malicious recipe', () => {
                 return db
-                    .into('recipes')
-                    .insert([maliciousRecipe])
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert([maliciousRecipe])
+                    })
             })
 
             it ('removes XSS attack content', () => {
@@ -97,15 +139,23 @@ describe('Recipes Endpoints', function() {
                     .get(`/api/recipes/${maliciousRecipe.id}`)
                     .expect(200)
                     .expect(res => {
-                        expect(res.body.title).to.eql('Bad title &lt;script&gt;alert(\"xss\");&lt;/script&gt;')
-                        expect(res.body.ingredients).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`)
-                        expect(res.body.instructions).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`)
+                        expect(res.body.title).to.eql(expectedRecipe.title)
+                        expect(res.body.ingredients).to.eql(expectedRecipe.ingredients)
+                        expect(res.body.instructions).to.eql(expectedRecipe.instructions)
+                        expect(res.body.image_url).to.eql(expectedRecipe.image_url)
                     })
             })
         })
     })
 
     describe(`POST /api/recipes`, () => {
+        const testUsers = makeUsersArray()
+        beforeEach('insert malicious recipe', () => {
+            return db
+                .into('users')
+                .insert(testUsers)
+        })
+
         it('creates a recipe, responding with 201 and the new recipe', () => {
             this.retries(3)
             const newRecipe = {
@@ -160,6 +210,20 @@ describe('Recipes Endpoints', function() {
                         error: { message: `Missing '${field}' in request body` }
                     })
             })
+
+            it('removes XSS attack content from response', () => {
+                const { maliciousRecipe, expectedRecipe } = makeMaliciousRecipe()
+                return supertest(app)
+                    .post(`/api/recipes`)
+                    .send(maliciousRecipe)
+                    .expect(201)
+                    .expect(res => {
+                        expect(res.body.title).to.eql(expectedRecipe.title)
+                        expect(res.body.ingredients).to.eql(expectedRecipe.ingredients)
+                        expect(res.body.instructions).to.eql(expectedRecipe.instructions)
+                        expect(res.body.image_url).to.eql(expectedRecipe.image_url)
+                    })
+            })
         })
     })
 
@@ -173,12 +237,18 @@ describe('Recipes Endpoints', function() {
             })
         })
         context('Given there are recipes in the database', () => {
+            const testUsers = makeUsersArray()
             const testRecipes = makeRecipesArray()
 
             beforeEach('insert recipes', () => {
                 return db
-                    .into('recipes')
-                    .insert(testRecipes)
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert(testRecipes)
+                    })
             })
 
             it('responds with 204 and removes the recipes', () => {
@@ -196,7 +266,7 @@ describe('Recipes Endpoints', function() {
         })
     })
 
-    describe.only(`PATCH /api/recipes/:id`, () => {
+    describe(`PATCH /api/recipes/:id`, () => {
         context(`Given no recipes`, () => {
             it('responds with 404', () => {
                 const recipeId = 123456
