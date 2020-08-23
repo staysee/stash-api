@@ -271,7 +271,7 @@ describe('Recipes Endpoints', function() {
             it('responds with 404', () => {
                 const recipeId = 123456
                 return supertest(app)
-                    .patch(`/api/recipes/${recipeId}`)
+                    .delete(`/api/recipes/${recipeId}`)
                     .expect(404, { 
                         error: { message: `Recipe doesn't exist` }
                     })
@@ -279,12 +279,18 @@ describe('Recipes Endpoints', function() {
         })
 
         context('Given there are articles in the database', () => {
+            const testUsers = makeUsersArray()
             const testRecipes = makeRecipesArray()
 
             beforeEach('insert recipes', () => {
                 return db
-                    .into('recipes')
-                    .insert(testRecipes)
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert(testRecipes)
+                    })
             })
 
             it('responds with 204 and updates the recipe', () => {
