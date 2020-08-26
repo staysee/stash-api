@@ -11,12 +11,22 @@ const UsersService = {
                 return rows[0]
             })
     },
-    getById(knex, id) {
-        return knex
-            .from('users')
-            .select('*')
-            .where('id', id)
-            .first()
+    async getById(knex, id) {
+        const [user, userRecipes, userMeals] = await Promise.all([knex
+            .from('users').select('*').where('id', id).first(),
+            knex('recipes').where('author', id).select('*'),
+            knex('meals').where('user_id', id).select('*')
+        ])
+
+        user.recipes = userRecipes
+        user.meals = userMeals
+
+        return user
+        // return knex
+        //     .from('users')
+        //     .select('*')
+        //     .where('id', id)
+        //     .first()
     },
     deleteUser(knex, id) {
         return knex('users')
@@ -27,6 +37,11 @@ const UsersService = {
         return knex('users')
         .where({ id })
         .update(newUserFields)
+    },
+    getUserRecipes(knex, id) {
+        return knex('recipes')
+            .where('user_id', id)
+            .select('*')
     }
 }
 

@@ -13,7 +13,9 @@ const serializeUser = user => ({
     username: xss(user.username),
     firstname: xss(user.firstname),
     lastname: xss(user.lastname),
-    date_created: user.date_created
+    date_created: user.date_created,
+    recipes: user.recipes,
+    meals: user.meals
 })
 
 usersRouter
@@ -22,7 +24,8 @@ usersRouter
         const knexInstance = req.app.get('db')
         UsersService.getAllUsers(knexInstance)
             .then(users => {
-                res.json(users.map(serializeUser))
+                // res.json(users.map(serializeUser))
+                res.json(users)
             })
             .catch(next)
     })
@@ -68,7 +71,8 @@ usersRouter
             .catch(next)
     })
     .get((req, res, next) => {
-        res.json(serializeUser(res.user))
+        // res.json(serializeUser(res.user))
+        res.json(res.user)
     })
     .delete((req, res, next) => {
         const knexInstance = req.app.get('db')
@@ -97,5 +101,17 @@ usersRouter
             })
             .catch(next)
     })
+
+usersRouter
+    .route('/:user_id/recipes')
+    .get((req, res, next) => {
+        const knexInstance = req.app.get('db')
+        UsersService.getUserRecipes(knexInstance, req.params.user_id)
+            .then(userRecipes => {
+                res.json(userRecipes)
+            })
+            .catch(next)
+    })
+
 
 module.exports = usersRouter

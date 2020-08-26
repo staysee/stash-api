@@ -9,5 +9,5 @@ CREATE TABLE users (
 
 ALTER TABLE recipes
     ADD COlUMN
-        author INTEGER REFERENCES users(id)
+        user_id INTEGER REFERENCES users(id)
         ON DELETE SET NULL;
