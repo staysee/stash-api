@@ -1,3 +1,5 @@
+BEGIN;
+
 TRUNCATE
   recipes,
   meals,
