@@ -8,7 +8,7 @@ function makeRecipesArray() {
             meal_type: 'Breakfast',
             image_url: 'https://via.placeholder.com/100',
             date_created: '2029-01-22T16:28:32.615Z',
-            author: 1
+            user_id: 1
         },
         {
             id: 2,
@@ -18,7 +18,7 @@ function makeRecipesArray() {
             meal_type: 'Lunch',
             image_url: 'https://via.placeholder.com/100',
             date_created: '2029-01-22T16:28:32.615Z',
-            author: 2
+            user_id: 2
         },
         {
             id: 3,
@@ -28,7 +28,7 @@ function makeRecipesArray() {
             meal_type: 'Dinner',
             image_url: 'https://via.placeholder.com/100',
             date_created: '2029-01-22T16:28:32.615Z',
-            author: 1
+            user_id: 1
         }
     ];
 }
@@ -41,7 +41,7 @@ function makeMaliciousRecipe() {
         instructions: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
         meal_type: 'Breakfast',
         image_url: 'https://url.to.file.which/does-not.exist',
-        author: 2
+        user_id: 2
     }
 
     const expectedRecipe = {
@@ -51,7 +51,7 @@ function makeMaliciousRecipe() {
         instructions: `Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`,
         meal_type: `Breakfast`,
         image_url: `https://url.to.file.which/does-not.exist`,
-        author: 2
+        user_id: 2
     }
 
     return {

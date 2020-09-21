@@ -14,7 +14,7 @@ const UsersService = {
     async getById(knex, id) {
         const [user, userRecipes, userMeals] = await Promise.all([knex
             .from('users').select('*').where('id', id).first(),
-            knex('recipes').where('author', id).select('*'),
+            knex('recipes').where('user_id', id).select('*'),
             knex('meals').where('user_id', id).select('*')
         ])
 

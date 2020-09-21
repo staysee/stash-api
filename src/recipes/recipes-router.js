@@ -18,7 +18,7 @@ const serializeRecipe = recipe => ({
     meal_type: recipe.meal_type,
     image_url: recipe.image_url,
     date_created: recipe.date_created,
-    author: recipe.author
+    user_id: recipe.user_id
 })
 
 recipesRouter
@@ -33,8 +33,8 @@ recipesRouter
     })
     .post(jsonParser,(req, res, next) => {
         // get the data
-        const { title, ingredients, instructions, meal_type, image_url, author } = req.body
-        const newRecipe = { title, ingredients, instructions, meal_type, image_url }
+        const { title, ingredients, instructions, meal_type, image_url, user_id } = req.body
+        const newRecipe = { title, ingredients, instructions, meal_type, image_url, user_id}
         const knexInstance = req.app.get('db')
 
         for (const [key, value] of Object.entries(newRecipe)) {
@@ -45,7 +45,7 @@ recipesRouter
             }
         }
 
-        newRecipe.author = author
+        newRecipe.user_id = user_id
 
         RecipesService.insertRecipe(knexInstance, newRecipe)
             .then(recipe => {
