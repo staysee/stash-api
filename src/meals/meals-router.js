@@ -8,7 +8,6 @@ const jsonParser = express.json()
 const serializeMeal = meal => ({
     id: meal.id,
     day: meal.day,
-    meal_type: meal.meal_type,
     recipe_id: meal.recipe_id,
     user_id: meal.user_id
 })
@@ -24,8 +23,8 @@ mealsRouter
             .catch(next)
     })
     .post(jsonParser, (req, res, next) => {
-        const { day, meal_type, recipe_id, user_id } = req.body
-        const newMeal = { day, meal_type, recipe_id, user_id }
+        const { day, recipe_id, user_id } = req.body
+        const newMeal = { day, recipe_id, user_id }
 
         for (const [key, value] of Object.entries(newMeal))
             if (value == null)
