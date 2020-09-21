@@ -19,4 +19,12 @@ VALUES
   ('johnny', 'John', 'Doe', 'password'),
   ('bettyboop', 'Betty', 'Boop', 'password');
 
+INSERT INTO meals
+  (day, recipe_id, user_id)
+VALUES
+  ('Monday', 2, 1),
+  ('Monday', 1, 1),
+  ('Tuesday', 2, 1),
+  ('Tuesday', 1, 1);
+
 COMMIT;
