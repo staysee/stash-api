@@ -34,7 +34,7 @@ recipesRouter
     .post(jsonParser,(req, res, next) => {
         // get the data
         const { title, ingredients, instructions, meal_type, image_url, user_id } = req.body
-        const newRecipe = { title, ingredients, instructions, meal_type, image_url, user_id}
+        const newRecipe = { title, ingredients, instructions, meal_type, image_url }
         const knexInstance = req.app.get('db')
 
         for (const [key, value] of Object.entries(newRecipe)) {
@@ -55,8 +55,6 @@ recipesRouter
                     .json(serializeRecipe(recipe))
             })
             .catch(next)
-        
-        
     })
 
 recipesRouter
