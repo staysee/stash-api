@@ -1,7 +1,7 @@
 const MealsService = {
     getAllMeals(knex) {
         return knex.select('*').from('meals')
-    },
+    },            
     insertMeal(knex, newMeal) {
         return knex
             .insert(newMeal)

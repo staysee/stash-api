@@ -18,7 +18,10 @@ mealsRouter
         const knexInstance = req.app.get('db')
         MealsService.getAllMeals(knexInstance)
             .then(meals => {
-                res.json(meals.map(serializeMeal))
+                // res.json(meals.map(serializeMeal))
+                res.json(meals.reduce((acc, item) => ({
+                    ...acc, [item.day]: meals.filter( (i) => i.day === item.day)
+                }), {} ))
             })
             .catch(next)
     })
