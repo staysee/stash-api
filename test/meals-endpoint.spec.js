@@ -5,6 +5,8 @@ const app = require('../src/app')
 const { makeUsersArray } = require('./users.fixtures')
 const { makeRecipesArray } = require('./recipes.fixtures')
 const { makeMealsArray } = require('./meals.fixtures')
+const MealsService = require('../src/meals/meals-service')
+const { getAllMeals } = require('../src/meals/meals-service')
 
 
 describe.only(` Meals Endpoints`, () => {
@@ -99,7 +101,7 @@ describe.only(` Meals Endpoints`, () => {
         })
     })
 
-    describe.only(`POST /api/meals`, () => {
+    describe(`POST /api/meals`, () => {
         it ('creates a meal, responding with 201 and the new meal', () => {
             const newMeal = {
                 day: 'Thursday',
@@ -121,6 +123,40 @@ describe.only(` Meals Endpoints`, () => {
                         .get(`/api/meals/${postRes.body.id}`)
                         .expect(postRes.body)
                 )
+        })
+    })
+
+    describe.only(`DELETE from '/api/meals`, () => {
+        context(`Given 'blogful_articles' has data`, () => {
+            const testUsers = makeUsersArray()
+            const testRecipes = makeRecipesArray()
+            const testMeals = makeMealsArray()
+
+            beforeEach('insert meals', () => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert(testRecipes)
+                            .then(() => {
+                                return db
+                                    .into('meals')
+                                    .insert(testMeals)
+                            })
+                    })
+            })
+
+            it(`deleteMeal() removes a meal by id from 'meals' table`, () => {
+                const mealId = 2
+                return MealsService.deleteMeal(db, mealId)
+                    .then(() => MealsService.getAllMeals(db))
+                    .then(allMeals => {
+                        const expected = testMeals.filter(meal => meal.id !== mealId)
+                        expect(allMeals).to.eql(expected)
+                    })
+            })
         })
     })
 
