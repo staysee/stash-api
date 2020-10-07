@@ -22,11 +22,6 @@ const UsersService = {
         user.meals = userMeals
 
         return user
-        // return knex
-        //     .from('users')
-        //     .select('*')
-        //     .where('id', id)
-        //     .first()
     },
     deleteUser(knex, id) {
         return knex('users')

@@ -1,7 +1,6 @@
 const path = require('path')
 const express = require('express')
 const xss = require('xss')
-const UserService = require('./users-service')
 const UsersService = require('./users-service')
 const { json } = require('express')
 
