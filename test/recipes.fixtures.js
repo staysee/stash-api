@@ -7,7 +7,7 @@ function makeRecipesArray() {
             instructions: 'Some test instructions',
             meal_type: 'Breakfast',
             image_url: 'https://via.placeholder.com/100',
-            date_created: '2029-01-22T16:28:32.615Z',
+            date_created: new Date('2029-01-22T16:28:32.615Z'),
             user_id: 1
         },
         {
@@ -17,7 +17,7 @@ function makeRecipesArray() {
             instructions: 'Some test instructions',
             meal_type: 'Lunch',
             image_url: 'https://via.placeholder.com/100',
-            date_created: '2029-01-22T16:28:32.615Z',
+            date_created: new Date('2029-01-22T16:28:32.615Z'),
             user_id: 2
         },
         {
@@ -27,7 +27,7 @@ function makeRecipesArray() {
             instructions: 'Some test instructions',
             meal_type: 'Dinner',
             image_url: 'https://via.placeholder.com/100',
-            date_created: '2029-01-22T16:28:32.615Z',
+            date_created: new Date('2029-01-22T16:28:32.615Z'),
             user_id: 1
         }
     ];
