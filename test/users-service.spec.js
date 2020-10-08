@@ -5,7 +5,7 @@ const { makeUsersArray } = require('./users.fixtures')
 const { makeRecipesArray } = require('./recipes.fixtures')
 const { makeMealsArray, makeMealsObject } = require('./meals.fixtures')
 
-describe.only(`Users Service object`, () => {
+describe(`Users Service object`, () => {
     let db
     
     before(() => {
