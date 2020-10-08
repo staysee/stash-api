@@ -148,11 +148,20 @@ describe.only(` Meals Endpoints`, () => {
         })
     })
 
-    describe(`DELETE from '/api/meals`, () => {
-        context(`Given 'meals' has data`, () => {
+    describe(`DELETE /api/meals/:id`, () => {
+        context('Given no meals', () => {
+            it(`responds with 404`, () => {
+                const mealId = 10
+                return supertest(app)
+                    .delete(`/api/meals/${mealId}`)
+                    .expect(404, { error: { message: `Meal doesn't exist` } })
+            })
+        })
+        context('Given there are meals in the database', () => {
             const testUsers = makeUsersArray()
             const testRecipes = makeRecipesArray()
             const testMeals = makeMealsArray()
+            const mealsOutput = makeMealsObject()
 
             beforeEach('insert meals', () => {
                 return db
@@ -170,16 +179,22 @@ describe.only(` Meals Endpoints`, () => {
                     })
             })
 
-            it(`deleteMeal() removes a meal by id from 'meals' table`, () => {
-                const mealId = 2
-                return MealsService.deleteMeal(db, mealId)
-                    .then(() => MealsService.getAllMeals(db))
-                    .then(allMeals => {
-                        const expected = testMeals.filter(meal => meal.id !== mealId)
-                        expect(allMeals).to.eql(expected)
-                    })
+            it('responds with 204 and removes the meal', () => {
+                const idToRemove = 2
+                const removedMeal = testMeals.filter(meal => meal.id !== idToRemove)
+                const expectedMeals = removedMeal.reduce( (acc, item) => ({
+                    ...acc, [item.day]: removedMeal.filter( (i) => i.day === item.day)
+                }), {} )
+
+                return supertest(app)
+                    .delete(`/api/meals/${idToRemove}`)
+                    .expect(204)
+                    .then(res =>
+                        supertest(app)
+                        .get(`/api/meals`)
+                        .expect(expectedMeals)
+                    )
             })
         })
     })
-
 })
