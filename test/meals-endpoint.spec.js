@@ -5,8 +5,6 @@ const app = require('../src/app')
 const { makeUsersArray } = require('./users.fixtures')
 const { makeRecipesArray } = require('./recipes.fixtures')
 const { makeMealsArray, makeMealsObject } = require('./meals.fixtures')
-const MealsService = require('../src/meals/meals-service')
-const { getAllMeals } = require('../src/meals/meals-service')
 
 
 describe(` Meals Endpoints`, () => {

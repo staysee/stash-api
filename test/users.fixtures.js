@@ -6,7 +6,7 @@ function makeUsersArray() {
             firstname: 'Jane',
             lastname: 'Doe',
             password: 'password',
-            date_created: '2029-01-22T16:28:32.615Z'
+            date_created: new Date('2029-01-22T16:28:32.615Z')
         },
         {
             id: 2,
@@ -14,7 +14,7 @@ function makeUsersArray() {
             firstname: 'John',
             lastname: 'Doe',
             password: 'password',
-            date_created: '2100-05-22T16:28:32.615Z'
+            date_created: new Date('2100-05-22T16:28:32.615Z')
 
         }
     ]
