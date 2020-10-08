@@ -4,7 +4,7 @@ const supertest = require('supertest')
 const app = require('../src/app')
 const { makeUsersArray } = require('./users.fixtures')
 const { makeRecipesArray } = require('./recipes.fixtures')
-const { makeMealsArray } = require('./meals.fixtures')
+const { makeMealsArray, makeMealsObject } = require('./meals.fixtures')
 const MealsService = require('../src/meals/meals-service')
 const { getAllMeals } = require('../src/meals/meals-service')
 
@@ -38,6 +38,7 @@ describe.only(` Meals Endpoints`, () => {
             const testUsers = makeUsersArray()
             const testRecipes = makeRecipesArray()
             const testMeals = makeMealsArray()
+            const mealsOutput = makeMealsObject()
             
             beforeEach('insert meals', () => {
                 return db
@@ -57,7 +58,7 @@ describe.only(` Meals Endpoints`, () => {
             it(`responds with 200 and all of the meals`, () => {
                 return supertest(app)
                     .get(`/api/meals`)
-                    .expect(200, testMeals)
+                    .expect(200, mealsOutput)
             })
         })
     })
@@ -102,10 +103,30 @@ describe.only(` Meals Endpoints`, () => {
     })
 
     describe(`POST /api/meals`, () => {
+        const testUsers = makeUsersArray()
+        const testRecipes = makeRecipesArray()
+        const testMeals = makeMealsArray()
+        
+        before('insert meals', () => {
+            return db
+                .into('users')
+                .insert(testUsers)
+                .then(() => {
+                    return db
+                        .into('recipes')
+                        .insert(testRecipes)
+                //         .then(() => {
+                //             return db
+                //                 .into('meals')
+                //                 .insert(testMeals)
+                //         })
+                })
+        })
         it ('creates a meal, responding with 201 and the new meal', () => {
             const newMeal = {
-                day: 'Thursday',
-                recipe_id: 2
+                day: 'Saturday',
+                recipe_id: 2,
+                user_id: 1
             }
 
             return supertest(app)
@@ -115,6 +136,7 @@ describe.only(` Meals Endpoints`, () => {
                 .expect(res => {
                     expect(res.body.day).to.eql(newMeal.day)
                     expect(res.body.recipe_id).to.eql(newMeal.recipe_id)
+                    expect(res.body.user_id).to.eql(newMeal.user_id)
                     expect(res.body).to.have.property('id')
                     expect(res.headers.location).to.eql(`/api/meals/${res.body.id}`)
                 })
@@ -126,8 +148,8 @@ describe.only(` Meals Endpoints`, () => {
         })
     })
 
-    describe.only(`DELETE from '/api/meals`, () => {
-        context(`Given 'blogful_articles' has data`, () => {
+    describe(`DELETE from '/api/meals`, () => {
+        context(`Given 'meals' has data`, () => {
             const testUsers = makeUsersArray()
             const testRecipes = makeRecipesArray()
             const testMeals = makeMealsArray()

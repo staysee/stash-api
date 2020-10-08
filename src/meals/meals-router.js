@@ -28,7 +28,7 @@ mealsRouter
     .post(jsonParser, (req, res, next) => {
         const { day, recipe_id, user_id } = req.body
         const newMeal = { day, recipe_id, user_id }
-
+        console.log(`NEWMEAL:`, newMeal)
         for (const [key, value] of Object.entries(newMeal))
             if (value == null)
                 return res.status(400).json({
@@ -53,7 +53,7 @@ mealsRouter
         MealsService.getById(knexInstance, req.params.meal_id)
             .then(meal => {
                 if (!meal) {
-                    return res.status(400).json({
+                    return res.status(404).json({
                         error: { message: `Meal doesn't exist` }
                     })
                 }
