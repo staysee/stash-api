@@ -9,7 +9,7 @@ const MealsService = require('../src/meals/meals-service')
 const { getAllMeals } = require('../src/meals/meals-service')
 
 
-describe.only(` Meals Endpoints`, () => {
+describe(` Meals Endpoints`, () => {
 
     let db
 
