@@ -5,11 +5,8 @@ const { makeRecipesArray } = require('./recipes.fixtures')
 const { makeUsersArray } = require('./users.fixtures')
 const { getAllRecipes } = require('../src/recipes/recipes-service')
 
-describe.only(`Recipes service object`, function() {
+describe(`Recipes service object`, function() {
     let db
-
-    const testUsers = makeUsersArray()
-    const testRecipes = makeRecipesArray()
 
     before('setup db', () => {
         db = knex({
@@ -18,15 +15,18 @@ describe.only(`Recipes service object`, function() {
         })
     })
 
-    before ('clean db', () => db.raw('TRUNCATE recipes, users, meals RESTART IDENTITY CASCADE'))
+    before ('clean the table', () => db.raw('TRUNCATE recipes, users, meals RESTART IDENTITY CASCADE'))
 
-    afterEach('clean after each test', () => db.raw('TRUNCATE recipes, users, meals RESTART IDENTITY CASCADE'))
+    afterEach('clean up', () => db.raw('TRUNCATE recipes, users, meals RESTART IDENTITY CASCADE'))
 
     after(() => db.destroy())
 
     
     context(`Given 'recipes' has data`, () => {
-        beforeEach(() => {
+        const testUsers = makeUsersArray()
+        const testRecipes = makeRecipesArray()
+
+        beforeEach('insert recipes', () => {
             return db
                 .into('users')
                 .insert(testUsers)
