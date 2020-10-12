@@ -49,18 +49,15 @@ describe(`Users Service object`, () => {
         })
 
         it(`getById() resolves a user by id from 'users' table`, () => {
-            const thirdId = 3
-            const thirdTestUser= testUsers[thirdId-1]
-            return UsersService.getById(db, thirdId)
+            const secondId = 2
+            const secondTestUser = testUsers.find( user => user.id === secondId)
+            console.log(`second`, secondTestUser)
+            return UsersService.getById(db, secondId)
                 .then(actual => {
-                    expect(actual).to.eql({
-                        id: thirdId,
-                        username: thirdTestUser.username,
-                        firstname: thirdTestUser.firstname,
-                        lastname: thirdTestUser.lastname,
-                        recipes: thirdTestUser.recipes,
-                        meals: thirdTestUser.meals
-                    })
+                    console.log(`actual`, actual)
+                    expect(actual.username).to.eql(secondTestUser.username)
+                    expect(actual.firstname).to.eql(secondTestUser.firstname)
+                    expect(actual.lastname).to.eql(secondTestUser.lastname)
                 })
             
         })
@@ -82,16 +79,13 @@ describe(`Users Service object`, () => {
                 username: 'username',
                 firstname: 'firstname',
                 lastname: 'lastname',
-                recipes: testRecipes,
-                meals: userMeals
             }
             return UsersService.updateUser(db, idOfUserToUpdate, newUserData)
                 .then(() => UsersService.getById(db, idOfUserToUpdate))
                 .then(user => {
-                    expect(user).to.eql({
-                        id: idOfUserToUpdate,
-                        ...newUserData
-                    })
+                    expect(user.username).to.eql(newUserData.username)
+                    expect(user.firstname).to.eql(newUserData.firstname)
+                    expect(user.lastname).to.eql(newUserData.lastname)
                 })
         })
     })

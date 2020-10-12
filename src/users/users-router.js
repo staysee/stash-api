@@ -5,7 +5,7 @@ const UsersService = require('./users-service')
 const { json } = require('express')
 
 const usersRouter = express.Router()
-const jsonParser = express.json()
+const jsonBodyParser = express.json()
 
 const serializeUser = user => ({
     id: user.id,
@@ -19,7 +19,7 @@ const serializeUser = user => ({
 
 usersRouter
     .route('/')
-    .get((req, res, next) => {
+    .get(jsonBodyParser, (req, res, next) => {
         const knexInstance = req.app.get('db')
         UsersService.getAllUsers(knexInstance)
             .then(users => {
@@ -28,7 +28,7 @@ usersRouter
             })
             .catch(next)
     })
-    .post(jsonParser, (req, res, next) => {
+    .post(jsonBodyParser, (req, res, next) => {
         const { username, firstname, lastname, password } = req.body
         const newUser = { username, firstname, lastname }
 
@@ -81,7 +81,7 @@ usersRouter
             })
             .catch(next)
     })
-    .patch(jsonParser, (req, res, next) => {
+    .patch(jsonBodyParser, (req, res, next) => {
         const { username, firstname, lastname, password } = req.body
         const userToUpdate = { username, firstname, lastname, password }
 

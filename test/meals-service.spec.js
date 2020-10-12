@@ -76,6 +76,19 @@ describe(`Meals Service object`, function() {
     })
 
     context(`Given 'meals' has no data`, () => {
+        const testUsers = makeUsersArray()
+        const testRecipes = makeRecipesArray()
+
+        beforeEach('insert meals', () => {
+            return db
+                .into('users')
+                .insert(testUsers)
+                .then(() => {
+                    return db
+                        .into('recipes')
+                        .insert(testRecipes)
+                })
+        })
         it(`getAllmeals() resolves an empty array`, () => {
             return MealsService.getAllMeals(db)
                 .then(actual => {
@@ -93,7 +106,7 @@ describe(`Meals Service object`, function() {
             return MealsService.insertMeal(db, newMeal)
                 .then(actual => {
                     expect(actual).to.eql({
-                        id: 5,
+                        id: 1,
                         day: newMeal.day,
                         recipe_id: newMeal.recipe_id,
                         user_id: newMeal.user_id

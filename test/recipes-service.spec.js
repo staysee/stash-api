@@ -69,8 +69,7 @@ describe(`Recipes service object`, function() {
             return RecipesService.deleteRecipe(db, recipeId)
                 .then(() => RecipesService.getAllRecipes(db))
                 .then(allRecipes => {
-                    const expected = testRecipes.filter(recipe => recipe.id !== recipeId)
-                    expect(allRecipes).to.eql(expected)
+                    expect(allRecipes.find(recipes => recipes.id === recipeId)).to.eql(undefined)
                 })
         })
 
@@ -97,7 +96,9 @@ describe(`Recipes service object`, function() {
     })
 
     context(`Given 'recipes' has no data`, () => {
-        before(() => {
+        const testUsers = makeUsersArray()
+
+        beforeEach(() => {
             return db
                 .into('users')
                 .insert(testUsers)
