@@ -3,6 +3,7 @@ const express = require('express')
 const xss = require('xss')
 const UsersService = require('./users-service')
 const { json } = require('express')
+const bcrypt = require('bcryptjs')
 
 const usersRouter = express.Router()
 const jsonBodyParser = express.json()
@@ -28,7 +29,7 @@ usersRouter
             })
             .catch(next)
     })
-    .post(jsonBodyParser, (req, res, next) => {
+    .post(jsonBodyParser, async (req, res, next) => {
         const { username, firstname, lastname, password } = req.body
         const newUser = { username, firstname, lastname }
 
@@ -40,8 +41,9 @@ usersRouter
             }
         }
 
-        newUser.password = password
+        newUser.password = await bcrypt.hash(password, 12)
 
+        console.log(`NEW USER`, newUser.password)
         const knexInstance = req.app.get('db')
         UsersService.insertUser(knexInstance, newUser)
             .then(user => {
