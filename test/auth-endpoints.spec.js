@@ -1,7 +1,7 @@
 // const knex = require('knex')
 // const jwt = require('jsonwebtoken')
 // const app = require('../src/app')
-// const { makeUsersArray } = require('./users.fixtures')
+// const { makeUsersArray } = require('./test-helpers')
 
 // describe.skip('Auth Endpoints', function () {
 //     let db 

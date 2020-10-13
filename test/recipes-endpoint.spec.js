@@ -2,8 +2,8 @@ const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
 const supertest = require('supertest')
-const { makeRecipesArray, makeMaliciousRecipe } = require('./recipes.fixtures')
-const { makeUsersArray } = require('./users.fixtures')
+const { makeUsersArray, makeRecipesArray, makeMaliciousRecipe} = require('./test-helpers')
+
 
 describe('Recipes Endpoints', function() {
     let db

@@ -5,7 +5,7 @@ const logger = require('../logger')
 const xss = require('xss')
 const { end } = require('../logger')
 const RecipesService = require('./recipes-service')
-const { requireAuth } = require('../middleware/basic-auth')
+const { requireAuth } = require('../middleware/jwt-auth')
 
 const recipesRouter = express.Router()
 const jsonParser = express.json()
@@ -23,6 +23,7 @@ const serializeRecipe = recipe => ({
 
 recipesRouter
     .route('/')
+    .all(requireAuth)
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
         RecipesService.getAllRecipes(knexInstance)
@@ -59,6 +60,7 @@ recipesRouter
 
 recipesRouter
     .route('/:id')
+    .all(requireAuth)
     .all((req, res, next) => {
         const knexInstance = req.app.get('db')
         RecipesService.getById(knexInstance, req.params.id)

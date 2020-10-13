@@ -2,9 +2,7 @@ const { expect } = require('chai')
 const knex = require('knex')
 const supertest = require('supertest')
 const app = require('../src/app')
-const { makeUsersArray } = require('./users.fixtures')
-const { makeRecipesArray } = require('./recipes.fixtures')
-const { makeMealsArray, makeMealsObject } = require('./meals.fixtures')
+const { makeUsersArray, makeRecipesArray, makeMealsArray, makeMealsObject } = require('./test-helpers')
 
 
 describe(` Meals Endpoints`, () => {

@@ -1,9 +1,8 @@
 const MealsService = require('../src/meals/meals-service')
 const knex = require('knex')
 const { expect } = require('chai')
-const { makeMealsArray } = require('./meals.fixtures')
-const { makeUsersArray } = require('./users.fixtures')
-const { makeRecipesArray } = require('./recipes.fixtures')
+const { makeUsersArray, makeRecipesArray, makeMealsArray } = require('./test-helpers')
+
 
 describe(`Meals Service object`, function() {
     let db

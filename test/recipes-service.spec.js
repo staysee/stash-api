@@ -1,8 +1,7 @@
 const RecipesService = require('../src/recipes/recipes-service')
 const knex = require('knex')
 const { expect } = require('chai')
-const { makeRecipesArray } = require('./recipes.fixtures')
-const { makeUsersArray } = require('./users.fixtures')
+const { makeUsersArray, makeRecipesArray } = require('./test-helpers')
 const { getAllRecipes } = require('../src/recipes/recipes-service')
 
 describe(`Recipes service object`, function() {
