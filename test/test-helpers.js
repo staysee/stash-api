@@ -1,3 +1,6 @@
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+
 function makeMealsArray() {
     return [
         {
@@ -125,10 +128,28 @@ function makeUsersArray() {
     ]
 }
 
+function makeRecipesFixtures() {
+    const testUsers = makeUsersArray()
+    const testRecipes = makeRecipesArray()
+    const testMeals = makeMealsArray()
+    return { testUsers, testRecipes, testMeals }
+}
+
+function makeAuthHeader(user, secret=process.env.JWT_SECRET) {
+    const token = jwt.sign({ user_id: user.id }, secret, {
+      subject: user.username,
+      algorithm: 'HS256',
+    })
+    return `Bearer ${token}`
+  }
+
 module.exports = {
     makeMealsArray,
     makeMealsObject,
     makeRecipesArray,
     makeMaliciousRecipe,
-    makeUsersArray
+    makeUsersArray,
+
+    makeRecipesFixtures,
+    makeAuthHeader
 }

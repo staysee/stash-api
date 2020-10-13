@@ -2,12 +2,17 @@ const { expect } = require('chai')
 const knex = require('knex')
 const supertest = require('supertest')
 const app = require('../src/app')
-const { makeUsersArray, makeRecipesArray, makeMealsArray, makeMealsObject } = require('./test-helpers')
+const helpers = require('./test-helpers')
 
 
-describe(` Meals Endpoints`, () => {
+describe.only(` Meals Endpoints`, () => {
 
     let db
+
+    const { 
+        testUsers, 
+        testRecipes, 
+        testMeals } = helpers.makeRecipesFixtures()
 
     before('make knex instance', () => {
         db = knex({
@@ -24,17 +29,25 @@ describe(` Meals Endpoints`, () => {
 
     describe(`GET /api/meals`, () => {
         context('Given no meals', () => {
+            beforeEach('insert meals', () => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert(testRecipes)
+                    })
+            })
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
                     .get('/api/meals')
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, {})
             })
         })
         context(`Given there are meals in the database`, () => {
-            const testUsers = makeUsersArray()
-            const testRecipes = makeRecipesArray()
-            const testMeals = makeMealsArray()
-            const mealsOutput = makeMealsObject()
+            const mealsOutput = helpers.makeMealsObject()
             
             beforeEach('insert meals', () => {
                 return db
@@ -54,6 +67,7 @@ describe(` Meals Endpoints`, () => {
             it(`responds with 200 and all of the meals`, () => {
                 return supertest(app)
                     .get(`/api/meals`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, mealsOutput)
             })
         })
@@ -61,18 +75,26 @@ describe(` Meals Endpoints`, () => {
 
     describe(`GET /api/meals/:id`, () => {
         context('Given no meals', () => {
+            beforeEach('insert meals', () => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert(testRecipes)
+                    })
+            })       
+
             it('responds with 404', () => {
                 const mealId = 123
                 return supertest(app)
                     .get(`/api/meals/${mealId}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(404, { error: { message: `Meal doesn't exist` } })
             })
         })
-        context('Given there are meals in the database', () => {
-            const testUsers = makeUsersArray()
-            const testRecipes = makeRecipesArray()
-            const testMeals = makeMealsArray()
-                
+        context('Given there are meals in the database', () => {                
             beforeEach('insert meals', () => {
                 return db
                     .into('users')
@@ -93,16 +115,13 @@ describe(` Meals Endpoints`, () => {
                 const expectedMeal = testMeals[mealId - 1]
                 return supertest(app)
                     .get(`/api/meals/${mealId}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, expectedMeal)
             })
         })
     })
 
     describe(`POST /api/meals`, () => {
-        const testUsers = makeUsersArray()
-        const testRecipes = makeRecipesArray()
-        const testMeals = makeMealsArray()
-        
         before('insert meals', () => {
             return db
                 .into('users')
@@ -111,11 +130,6 @@ describe(` Meals Endpoints`, () => {
                     return db
                         .into('recipes')
                         .insert(testRecipes)
-                //         .then(() => {
-                //             return db
-                //                 .into('meals')
-                //                 .insert(testMeals)
-                //         })
                 })
         })
         it ('creates a meal, responding with 201 and the new meal', () => {
@@ -127,6 +141,7 @@ describe(` Meals Endpoints`, () => {
 
             return supertest(app)
                 .post('/api/meals')
+                .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                 .send(newMeal)
                 .expect(201)
                 .expect(res => {
@@ -139,6 +154,7 @@ describe(` Meals Endpoints`, () => {
                 .then(postRes =>
                     supertest(app)
                         .get(`/api/meals/${postRes.body.id}`)
+                        .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                         .expect(postRes.body)
                 )
         })
@@ -146,19 +162,26 @@ describe(` Meals Endpoints`, () => {
 
     describe(`DELETE /api/meals/:id`, () => {
         context('Given no meals', () => {
+            beforeEach('insert recipes', () => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert(testRecipes)
+                    })
+            })
             it(`responds with 404`, () => {
                 const mealId = 10
                 return supertest(app)
                     .delete(`/api/meals/${mealId}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(404, { error: { message: `Meal doesn't exist` } })
             })
         })
         context('Given there are meals in the database', () => {
-            const testUsers = makeUsersArray()
-            const testRecipes = makeRecipesArray()
-            const testMeals = makeMealsArray()
-            const mealsOutput = makeMealsObject()
-
+            const mealsOutput = helpers.makeMealsObject()
             beforeEach('insert meals', () => {
                 return db
                     .into('users')
@@ -184,10 +207,12 @@ describe(` Meals Endpoints`, () => {
 
                 return supertest(app)
                     .delete(`/api/meals/${idToRemove}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(204)
                     .then(res =>
                         supertest(app)
                         .get(`/api/meals`)
+                        .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                         .expect(expectedMeals)
                     )
             })

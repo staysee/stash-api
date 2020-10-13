@@ -2,11 +2,16 @@ const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
 const supertest = require('supertest')
-const { makeUsersArray, makeRecipesArray, makeMaliciousRecipe} = require('./test-helpers')
+const helpers = require('./test-helpers')
 
 
 describe('Recipes Endpoints', function() {
     let db
+
+    const { 
+        testUsers, 
+        testRecipes, 
+        testMeals } = helpers.makeRecipesFixtures()
 
     //create knex instance to connect to test DB
     before('make knex instance', () => {
@@ -25,17 +30,22 @@ describe('Recipes Endpoints', function() {
 
     describe(`GET /api/recipes`, () => {
         context('Given no recipes', () => {
+            beforeEach(() => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+            })
+
             it('responds with 200 and an empty list', () => {
+                console.log(`TEST`, testUsers)
                 return supertest(app)
                     .get('/api/recipes')
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, [])
             })
         })
 
         context('Given there are recipes in the database', () => {
-            const testUsers = makeUsersArray()
-            const testRecipes = makeRecipesArray()
-    
             beforeEach('insert recipes', () => {
                 return db
                     .into('users')
@@ -50,14 +60,13 @@ describe('Recipes Endpoints', function() {
             it('responds with 200 and all of the recipes', () => {
                 return supertest(app)
                     .get('/api/recipes')
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, testRecipes)
             })
         })
 
         context(`Given an XSS attack recipe`, () => {
-            const testUsers = makeUsersArray()
-            const { maliciousRecipe, expectedRecipe } = makeMaliciousRecipe()
-
+            const { maliciousRecipe, expectedRecipe } = helpers.makeMaliciousRecipe()
             beforeEach('insert malicious recipe', () => {
                 return db
                     .into('users')
@@ -72,6 +81,7 @@ describe('Recipes Endpoints', function() {
             it('removes XSS attack content', () => {
                 return supertest(app)
                     .get(`/api/recipes`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(200)
                     .expect(res => {
                         expect(res.body[0].title).to.eql(expectedRecipe.title)
@@ -87,18 +97,21 @@ describe('Recipes Endpoints', function() {
 
     describe(`GET /api/recipes/:id`, () => {
         context('Given no recipes', () => {
+            beforeEach(() => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+            })
             it('responds with 404', () => {
                 const recipeId = 123456
                 return supertest(app)
                     .get(`/api/recipes/${recipeId}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(404, { error: { message: `Recipe doesn't exist` } })
             })
         })
 
         context(`Given there are recipes in the database`, () => {
-            const testUsers = makeUsersArray()
-            const testRecipes = makeRecipesArray()
-
             beforeEach('insert recipes', () => {
                 return db
                     .into('users')
@@ -115,14 +128,13 @@ describe('Recipes Endpoints', function() {
                 const expectedRecipe = testRecipes[recipeId - 1]
                 return supertest(app)
                     .get(`/api/recipes/${recipeId}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, expectedRecipe)
             })
         })
 
         context(`Given an XSS attack recipe`, () => {
-            const testUsers = makeUsersArray()
-            const { maliciousRecipe, expectedRecipe } = makeMaliciousRecipe()
-
+            const { maliciousRecipe, expectedRecipe } = helpers.makeMaliciousRecipe()
             beforeEach('insert malicious recipe', () => {
                 return db
                     .into('users')
@@ -137,6 +149,7 @@ describe('Recipes Endpoints', function() {
             it ('removes XSS attack content', () => {
                 return supertest(app)
                     .get(`/api/recipes/${maliciousRecipe.id}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(200)
                     .expect(res => {
                         expect(res.body.title).to.eql(expectedRecipe.title)
@@ -149,7 +162,6 @@ describe('Recipes Endpoints', function() {
     })
 
     describe(`POST /api/recipes`, () => {
-        const testUsers = makeUsersArray()
         beforeEach('insert malicious recipe', () => {
             return db
                 .into('users')
@@ -167,6 +179,7 @@ describe('Recipes Endpoints', function() {
             }
             return supertest(app)
                 .post('/api/recipes')
+                .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                 .send(newRecipe)
                 .expect(201)
                 .expect( res => {
@@ -185,6 +198,7 @@ describe('Recipes Endpoints', function() {
                 .then(postRes =>
                     supertest(app)
                     .get(`/api/recipes/${postRes.body.id}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(postRes.body)
                 )
         })
@@ -205,6 +219,7 @@ describe('Recipes Endpoints', function() {
     
                 return supertest(app)
                     .post('/api/recipes')
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .send(newRecipe)
                     .expect(400, {
                         error: { message: `Missing '${field}' in request body` }
@@ -212,9 +227,10 @@ describe('Recipes Endpoints', function() {
             })
 
             it('removes XSS attack content from response', () => {
-                const { maliciousRecipe, expectedRecipe } = makeMaliciousRecipe()
+                const { maliciousRecipe, expectedRecipe } = helpers.makeMaliciousRecipe()
                 return supertest(app)
                     .post(`/api/recipes`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .send(maliciousRecipe)
                     .expect(201)
                     .expect(res => {
@@ -229,17 +245,21 @@ describe('Recipes Endpoints', function() {
 
     describe(`DELETE /api/recipes/:id`, () => {
         context('Given no recipes', () => {
+            beforeEach(() => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+            })
+
             it(`responds with 404`, () => {
                 const recipeId = 123456
                 return supertest(app)
                     .delete(`/api/recipes/${recipeId}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(404, { error: { message: `Recipe doesn't exist` } })
             })
         })
         context('Given there are recipes in the database', () => {
-            const testUsers = makeUsersArray()
-            const testRecipes = makeRecipesArray()
-
             beforeEach('insert recipes', () => {
                 return db
                     .into('users')
@@ -252,14 +272,16 @@ describe('Recipes Endpoints', function() {
             })
 
             it('responds with 204 and removes the recipes', () => {
-                const idToRemove = 2
+                const idToRemove = 1
                 const expectedRecipes = testRecipes.filter(recipe => recipe.id !== idToRemove)
                 return supertest(app)
                     .delete(`/api/recipes/${idToRemove}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(204)
                     .then(res =>
                         supertest(app)
                         .get(`/api/recipes`)
+                        .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                         .expect(expectedRecipes)
                     )
             })
@@ -267,11 +289,18 @@ describe('Recipes Endpoints', function() {
     })
 
     describe(`PATCH /api/recipes/:id`, () => {
+        beforeEach(() => {
+            return db
+                .into('users')
+                .insert(testUsers)
+        })
+
         context(`Given no recipes`, () => {
             it('responds with 404', () => {
                 const recipeId = 123456
                 return supertest(app)
                     .delete(`/api/recipes/${recipeId}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(404, { 
                         error: { message: `Recipe doesn't exist` }
                     })
@@ -279,9 +308,6 @@ describe('Recipes Endpoints', function() {
         })
 
         context('Given there are articles in the database', () => {
-            const testUsers = makeUsersArray()
-            const testRecipes = makeRecipesArray()
-
             beforeEach('insert recipes', () => {
                 return db
                     .into('users')
@@ -294,7 +320,8 @@ describe('Recipes Endpoints', function() {
             })
 
             it('responds with 204 and updates the recipe', () => {
-                const idToUpdate = 2
+                const idToUpdate = 1
+                const recipeToUpdate = testRecipes.find(recipe => recipe.id === idToUpdate)
                 const updateRecipe = {
                     title: 'updated recipe title',
                     ingredients: 'New ingredients',
@@ -302,12 +329,14 @@ describe('Recipes Endpoints', function() {
                     meal_type: 'Lunch',
                     image_url: 'https://via.placeholder.com/100',
                 }
+
                 const expectedRecipe = {
-                    ...testRecipes[idToUpdate - 1],
+                    ...recipeToUpdate,
                     ...updateRecipe
                 }
                 return supertest(app)
                     .patch(`/api/recipes/${idToUpdate}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .send(updateRecipe)
                     .expect(204)
                     .then(res =>
@@ -321,6 +350,7 @@ describe('Recipes Endpoints', function() {
                 const idToUpdate = 2
                 return supertest(app)
                     .patch(`/api/recipes/${idToUpdate}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .send({ irrelevantField: 'foo' })
                     .expect(400, {
                         error: { message: `Request body must contain either 'title', 'ingredients', 'instructions', 'image_url'`}
@@ -339,6 +369,7 @@ describe('Recipes Endpoints', function() {
 
                 return supertest(app)
                     .patch(`/api/recipes/${idToUpdate}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .send({
                         ...updateRecipe,
                         fieldToIgnore: 'should not be in GET response'
