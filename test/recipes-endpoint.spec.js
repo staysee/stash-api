@@ -307,7 +307,7 @@ describe('Recipes Endpoints', function() {
             })
         })
 
-        context('Given there are articles in the database', () => {
+        context('Given there are recipes in the database', () => {
             beforeEach('insert recipes', () => {
                 return db
                     .into('users')

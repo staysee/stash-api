@@ -5,7 +5,7 @@ const app = require('../src/app')
 const helpers = require('./test-helpers')
 
 
-describe.only(` Meals Endpoints`, () => {
+describe(` Meals Endpoints`, () => {
 
     let db
 
