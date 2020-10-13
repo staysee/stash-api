@@ -289,13 +289,12 @@ describe('Recipes Endpoints', function() {
     })
 
     describe(`PATCH /api/recipes/:id`, () => {
-        beforeEach(() => {
-            return db
-                .into('users')
-                .insert(testUsers)
-        })
-
         context(`Given no recipes`, () => {
+            beforeEach(() => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+            })
             it('responds with 404', () => {
                 const recipeId = 123456
                 return supertest(app)
@@ -342,6 +341,7 @@ describe('Recipes Endpoints', function() {
                     .then(res =>
                         supertest(app)
                             .get(`/api/recipes/${idToUpdate}`)
+                            .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                             .expect(expectedRecipe)
                     )
             })
@@ -378,6 +378,7 @@ describe('Recipes Endpoints', function() {
                     .then(res =>
                         supertest(app)
                             .get(`/api/recipes/${idToUpdate}`)
+                            .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                             .expect(expectedRecipe)
                     )
             })
