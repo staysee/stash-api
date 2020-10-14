@@ -13,6 +13,8 @@ describe(` Meals Endpoints`, () => {
         testUsers, 
         testRecipes, 
         testMeals } = helpers.makeRecipesFixtures()
+    
+    const testUser = testUsers[0]
 
     before('make knex instance', () => {
         db = knex({
@@ -136,7 +138,6 @@ describe(` Meals Endpoints`, () => {
             const newMeal = {
                 day: 'Saturday',
                 recipe_id: 2,
-                user_id: 1
             }
 
             return supertest(app)
@@ -147,7 +148,7 @@ describe(` Meals Endpoints`, () => {
                 .expect(res => {
                     expect(res.body.day).to.eql(newMeal.day)
                     expect(res.body.recipe_id).to.eql(newMeal.recipe_id)
-                    expect(res.body.user_id).to.eql(newMeal.user_id)
+                    expect(res.body.user_id).to.eql(testUser.id)
                     expect(res.body).to.have.property('id')
                     expect(res.headers.location).to.eql(`/api/meals/${res.body.id}`)
                 })
@@ -157,6 +158,28 @@ describe(` Meals Endpoints`, () => {
                         .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                         .expect(postRes.body)
                 )
+        })
+
+        const requiredFields = ['day', 'recipe_id']
+
+        requiredFields.forEach(field => {
+            const newMeal = {
+                day: 'Test title',
+                recipe_id: 1
+            }
+        
+
+            it(`responds with 400 and an error message when '${field}' is missing`, () => {
+                delete newRecipe[field]
+
+                return supertest(app)
+                    .post('/api/meals')
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .send(newMeal)
+                    .expect(400, {
+                        error: { message: `Missing '${field}' in request body` }
+                    })
+            })
         })
     })
 
