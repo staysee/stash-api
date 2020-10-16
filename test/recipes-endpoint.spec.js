@@ -136,6 +136,8 @@ describe('Recipes Endpoints', function() {
                             .where({user_id: testUsers[0].id})
                             .first()
                             .then( row => {
+                                expect(row.day).to.eql(newMeal.day)
+                                expect(row.recipe_id).to.eql(newMeal.recipe_id)
                                 expect(row.user_id).to.eql(testUsers[0].id)
                             })
                     })
@@ -243,23 +245,23 @@ describe('Recipes Endpoints', function() {
                     const actual = new Date(res.body.date_created).toLocaleString()
                     expect(actual).to.eql(expected)
                 })
-                .expect(res => {
-                    db
-                        .from('recipes')
-                        .select('*')
-                        .where({user_id: testUsers[0].id})
-                        .first()
-                        .then( row => {
-                            expect(row.title).to.eql(newRecipe.title)
-                            expect(row.ingredients).to.eql(newRecipe.ingredients)
-                            expect(row.instructions).to.eql(newRecipe.instructions)
-                            expect(row.image_url).to.eql(newRecipe.image_url)
-                            expect(row.user_id).to.eql(testUsers[0].id)
-                            const expected = new Date().toLocaleString()
-                            const actual = new Date(row.date_created).toLocaleString()
-                            expect(actual).to.eql(expected)
-                        })
-                })
+                // .expect(res => {
+                //     db
+                //         .from('recipes')
+                //         .select('*')
+                //         .where({user_id: testUsers[0].id})
+                //         .first()
+                //         .then( row => {
+                //             expect(row.title).to.eql(newRecipe.title)
+                //             expect(row.ingredients).to.eql(newRecipe.ingredients)
+                //             expect(row.instructions).to.eql(newRecipe.instructions)
+                //             expect(row.image_url).to.eql(newRecipe.image_url)
+                //             expect(row.user_id).to.eql(testUsers[0].id)
+                //             const expected = new Date().toLocaleString()
+                //             const actual = new Date(row.date_created).toLocaleString()
+                //             expect(actual).to.eql(expected)
+                //         })
+                // })
         })
 
         const requiredFields = ['title', 'ingredients', 'instructions', 'meal_type', 'image_url']

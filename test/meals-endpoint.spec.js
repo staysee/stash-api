@@ -124,6 +124,7 @@ describe(` Meals Endpoints`, () => {
                                 expect(row.user_id).to.eql(testUsers[0].id)
                             })
                     })
+
             })
         })
     })
@@ -177,7 +178,7 @@ describe(` Meals Endpoints`, () => {
     })
 
     describe(`POST /api/meals`, () => {
-        before('insert meals', () => {
+        before('insert users and recipes', () => {
             return db
                 .into('users')
                 .insert(testUsers)
@@ -191,7 +192,7 @@ describe(` Meals Endpoints`, () => {
         it ('creates a meal, responding with 201 and the new meal', () => {
             const newMeal = {
                 day: 'Saturday',
-                recipe_id: 2,
+                recipe_id: 2
             }
 
             return supertest(app)
@@ -206,24 +207,12 @@ describe(` Meals Endpoints`, () => {
                     expect(res.body).to.have.property('id')
                     expect(res.headers.location).to.eql(`/api/meals/${res.body.id}`)
                 })
-                // .then(postRes =>
-                //     supertest(app)
-                //         .get(`/api/meals/${postRes.body.id}`)
-                //         .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
-                //         .expect(postRes.body)
-                // )
-                .expect(res => {
-                    db
-                        .from('meals')
-                        .select('*')
-                        .where({user_id: testUser.id})
-                        .first()
-                        .then( row => {
-                            expect(row.day).to.eql(newMeal.day)
-                            expect(row.recipe_id).to.eql(newMeal.recipe_id)
-                            expect(row.user_id).to.eql(testUser.id)
-                        })
-                })
+                .then(postRes =>
+                    supertest(app)
+                        .get(`/api/meals/${postRes.body.id}`)
+                        .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                        .expect(postRes.body)
+                )
         })
 
         const requiredFields = ['day', 'recipe_id']
