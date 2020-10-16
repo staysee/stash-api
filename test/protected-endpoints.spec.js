@@ -48,6 +48,11 @@ describe(`Protected endpoints`, () => {
             path: '/api/recipes/',
             method: supertest(app).get
         },
+        {
+            name: 'GET /api/recipes/user',
+            path: '/api/recipes/user',
+            method: supertest(app).get
+        },
         { 
             name: 'GET /api/recipes/:id',
             path: '/api/recipes/1',
@@ -71,6 +76,11 @@ describe(`Protected endpoints`, () => {
         {
             name: 'GET /api/meals',
             path: '/api/meals/',
+            method: supertest(app).get
+        },
+        {
+            name: 'GET /api/meals/user',
+            path: '/api/meals/user',
             method: supertest(app).get
         },
         {

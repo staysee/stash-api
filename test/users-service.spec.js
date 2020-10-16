@@ -50,10 +50,9 @@ describe(`Users Service object`, () => {
         it(`getById() resolves a user by id from 'users' table`, () => {
             const secondId = 2
             const secondTestUser = testUsers.find( user => user.id === secondId)
-            console.log(`second`, secondTestUser)
+            
             return UsersService.getById(db, secondId)
                 .then(actual => {
-                    console.log(`actual`, actual)
                     expect(actual.username).to.eql(secondTestUser.username)
                     expect(actual.firstname).to.eql(secondTestUser.firstname)
                     expect(actual.lastname).to.eql(secondTestUser.lastname)

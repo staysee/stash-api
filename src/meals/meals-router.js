@@ -30,24 +30,26 @@ mealsRouter
     .post(jsonParser, (req, res, next) => {
         const { day, recipe_id } = req.body
         const newMeal = { day, recipe_id }
-        console.log(`NEWMEAL:`, newMeal)
-        for (const [key, value] of Object.entries(newMeal))
-            if (value == null)
+        const knexInstance = req.app.get('db')
+        
+        for (const [key, value] of Object.entries(newMeal)) {
+            if (value == null) {
                 return res.status(400).json({
                     error: { message: `Missing '${key}' in request body` }
                 })
+            }
+        }
         
         newMeal.user_id = req.user.id
         
-        const knexInstance = req.app.get('db')
         MealsService.insertMeal(knexInstance, newMeal)
-                .then(meal => {
-                    res
-                        .status(201)
-                        .location(path.posix.join(req.originalUrl, `/${meal.id}`))
-                        .json(serializeMeal(meal))
-                })
-                .catch(next)
+            .then(meal => {
+                res
+                    .status(201)
+                    .location(path.posix.join(req.originalUrl, `/${meal.id}`))
+                    .json(serializeMeal(meal))
+            })
+            .catch(next)
     })
 
 mealsRouter

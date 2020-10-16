@@ -75,7 +75,7 @@ describe(` Meals Endpoints`, () => {
         })
     })
 
-    describe.only(`GET /api/meals/user`, () => {
+    describe(`GET /api/meals/user`, () => {
         context('Given no user meals', () => {
             beforeEach('insert users', () => {
                 return db
@@ -187,6 +187,7 @@ describe(` Meals Endpoints`, () => {
                         .insert(testRecipes)
                 })
         })
+
         it ('creates a meal, responding with 201 and the new meal', () => {
             const newMeal = {
                 day: 'Saturday',
@@ -205,12 +206,24 @@ describe(` Meals Endpoints`, () => {
                     expect(res.body).to.have.property('id')
                     expect(res.headers.location).to.eql(`/api/meals/${res.body.id}`)
                 })
-                .then(postRes =>
-                    supertest(app)
-                        .get(`/api/meals/${postRes.body.id}`)
-                        .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
-                        .expect(postRes.body)
-                )
+                // .then(postRes =>
+                //     supertest(app)
+                //         .get(`/api/meals/${postRes.body.id}`)
+                //         .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                //         .expect(postRes.body)
+                // )
+                .expect(res => {
+                    db
+                        .from('meals')
+                        .select('*')
+                        .where({user_id: testUser.id})
+                        .first()
+                        .then( row => {
+                            expect(row.day).to.eql(newMeal.day)
+                            expect(row.recipe_id).to.eql(newMeal.recipe_id)
+                            expect(row.user_id).to.eql(testUser.id)
+                        })
+                })
         })
 
         const requiredFields = ['day', 'recipe_id']

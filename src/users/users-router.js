@@ -43,7 +43,6 @@ usersRouter
 
         newUser.password = await bcrypt.hash(password, 12)
 
-        console.log(`NEW USER`, newUser.password)
         const knexInstance = req.app.get('db')
         UsersService.insertUser(knexInstance, newUser)
             .then(user => {

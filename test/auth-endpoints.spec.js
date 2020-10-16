@@ -86,7 +86,6 @@ describe('Auth Endpoints', function () {
                     }
                 )
                 return supertest(app)
-                    console.log('TEST ONLY PASSES WHEN SOMETHING IS HERE')
                     .post('/api/auth/login')
                     .send(userValidCreds)
                     .expect(200, {

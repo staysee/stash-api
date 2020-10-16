@@ -34,7 +34,7 @@ recipesRouter
         })
         .catch(next)
     })
-    .post(jsonParser,(req, res, next) => {
+    .post(jsonParser, (req, res, next) => {
         // get the data
         const { title, ingredients, instructions, meal_type, image_url } = req.body
         const newRecipe = { title, ingredients, instructions, meal_type, image_url }
@@ -48,7 +48,7 @@ recipesRouter
             }
         }
         
-        newRecipe.user_id = req.user_id
+        newRecipe.user_id = req.user.id
         
         RecipesService.insertRecipe(knexInstance, newRecipe)
         .then(recipe => {
@@ -65,7 +65,7 @@ recipesRouter
     .all(requireAuth)
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
-        console.log(`USER`, req.user)
+        
         RecipesService.getUserRecipes(knexInstance, req.user.id)
             .then(recipes => {
                 res.json(recipes.map(serializeRecipe))

@@ -38,7 +38,7 @@ describe('Recipes Endpoints', function() {
             })
 
             it('responds with 200 and an empty list', () => {
-                console.log(`TEST`, testUsers)
+                
                 return supertest(app)
                     .get('/api/recipes')
                     .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
@@ -243,13 +243,23 @@ describe('Recipes Endpoints', function() {
                     const actual = new Date(res.body.date_created).toLocaleString()
                     expect(actual).to.eql(expected)
                 })
-                //make second request to the GET /recipe/:id
-                .then(postRes =>
-                    supertest(app)
-                    .get(`/api/recipes/${postRes.body.id}`)
-                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
-                    .expect(postRes.body)
-                )
+                .expect(res => {
+                    db
+                        .from('recipes')
+                        .select('*')
+                        .where({user_id: testUsers[0].id})
+                        .first()
+                        .then( row => {
+                            expect(row.title).to.eql(newRecipe.title)
+                            expect(row.ingredients).to.eql(newRecipe.ingredients)
+                            expect(row.instructions).to.eql(newRecipe.instructions)
+                            expect(row.image_url).to.eql(newRecipe.image_url)
+                            expect(row.user_id).to.eql(testUsers[0].id)
+                            const expected = new Date().toLocaleString()
+                            const actual = new Date(row.date_created).toLocaleString()
+                            expect(actual).to.eql(expected)
+                        })
+                })
         })
 
         const requiredFields = ['title', 'ingredients', 'instructions', 'meal_type', 'image_url']
@@ -263,7 +273,7 @@ describe('Recipes Endpoints', function() {
                 image_url: 'https://via.placeholder.com/100'
             }
 
-            it(`responds with 400 and an error message when the 'title' is missing`, () => {
+            it(`responds with 400 and an error message when the '${field}' is missing`, () => {
                 delete newRecipe[field]
     
                 return supertest(app)
