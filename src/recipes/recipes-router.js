@@ -21,23 +21,25 @@ const serializeRecipe = recipe => ({
     user_id: recipe.user_id
 })
 
+
+
 recipesRouter
     .route('/')
     .all(requireAuth)
     .get((req, res, next) => {
         const knexInstance = req.app.get('db')
         RecipesService.getAllRecipes(knexInstance)
-            .then(recipes => {
-                res.json(recipes.map(serializeRecipe))
-            })
-            .catch(next)
+        .then(recipes => {
+            res.json(recipes.map(serializeRecipe))
+        })
+        .catch(next)
     })
     .post(jsonParser,(req, res, next) => {
         // get the data
-        const { title, ingredients, instructions, meal_type, image_url, user_id } = req.body
+        const { title, ingredients, instructions, meal_type, image_url } = req.body
         const newRecipe = { title, ingredients, instructions, meal_type, image_url }
         const knexInstance = req.app.get('db')
-
+        
         for (const [key, value] of Object.entries(newRecipe)) {
             if (value == null) {
                 return res.status(400).json({
@@ -45,15 +47,28 @@ recipesRouter
                 })
             }
         }
-
-        newRecipe.user_id = user_id
-
+        
+        newRecipe.user_id = req.user_id
+        
         RecipesService.insertRecipe(knexInstance, newRecipe)
-            .then(recipe => {
-                res
-                    .status(201)
-                    .location(path.posix.join(req.originalUrl + `/${recipe.id}`))
-                    .json(serializeRecipe(recipe))
+        .then(recipe => {
+            res
+            .status(201)
+            .location(path.posix.join(req.originalUrl + `/${recipe.id}`))
+            .json(serializeRecipe(recipe))
+        })
+        .catch(next)
+    })
+
+recipesRouter
+    .route('/user')
+    .all(requireAuth)
+    .get((req, res, next) => {
+        const knexInstance = req.app.get('db')
+        console.log(`USER`, req.user)
+        RecipesService.getUserRecipes(knexInstance, req.user.id)
+            .then(recipes => {
+                res.json(recipes.map(serializeRecipe))
             })
             .catch(next)
     })
@@ -64,16 +79,16 @@ recipesRouter
     .all((req, res, next) => {
         const knexInstance = req.app.get('db')
         RecipesService.getById(knexInstance, req.params.id)
-            .then(recipe => {
-                if (!recipe) {
-                    return res.status(404).json({
-                        error: { message: `Recipe doesn't exist`}
-                    })
-                }
-                res.recipe = recipe // save the recipe for the next middleware
-                next()
-            })
-            .catch(next)
+        .then(recipe => {
+            if (!recipe) {
+                return res.status(404).json({
+                    error: { message: `Recipe doesn't exist`}
+                })
+            }
+            res.recipe = recipe // save the recipe for the next middleware
+            next()
+        })
+        .catch(next)
     })
     .get((req, res, next) => {
         const { recipe } = res;
@@ -82,19 +97,19 @@ recipesRouter
     .delete((req, res, next) => {
         const knexInstance = req.app.get('db')
         return RecipesService.deleteRecipe(knexInstance, req.params.id)
-            .then( () => {
-                return res.status(204).json({ message: `Recipe with id ${req.params.id} was deleted.`})
-            })
-            .catch(next)
-
+        .then( () => {
+            return res.status(204).json({ message: `Recipe with id ${req.params.id} was deleted.`})
+        })
+        .catch(next)
+        
         logger.info(`Recipe with id ${id} deleted.`)
-
+        
     })
     .patch(jsonParser, (req, res, next) => {
         const { title, ingredients, instructions, meal_type, image_url } = req.body
         const recipeToUpdate = { title, ingredients, instructions, meal_type, image_url }
         const knexInstance = req.app.get('db')
-
+        
         const numberOfValues = Object.values(recipeToUpdate).filter(Boolean).length
         if (numberOfValues === 0) {
             return res.status(400).json({
@@ -103,12 +118,12 @@ recipesRouter
                 }
             })
         }
-
+        
         RecipesService.updateRecipe(knexInstance, req.params.id, recipeToUpdate)
-            .then(numRowsAffected => {
-                res.status(204).end()
-            })
-            .catch(next)
+        .then(numRowsAffected => {
+            res.status(204).end()
+        })
+        .catch(next)
     })
-
+    
 module.exports = recipesRouter

@@ -2,6 +2,11 @@ const RecipesService = {
     getAllRecipes(knex) {
         return knex.select('*').from('recipes')
     },
+    getUserRecipes(knex, userId) {
+        return knex('recipes')
+            .where({user_id: userId})
+            .select('*')
+    },
     insertRecipe(knex, newRecipe) {
         return knex
             .insert(newRecipe)

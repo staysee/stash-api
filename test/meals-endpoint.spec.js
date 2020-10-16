@@ -1,4 +1,5 @@
 const { expect } = require('chai')
+const { contentSecurityPolicy } = require('helmet')
 const knex = require('knex')
 const supertest = require('supertest')
 const app = require('../src/app')
@@ -6,7 +7,6 @@ const helpers = require('./test-helpers')
 
 
 describe(` Meals Endpoints`, () => {
-
     let db
 
     const { 
@@ -71,6 +71,59 @@ describe(` Meals Endpoints`, () => {
                     .get(`/api/meals`)
                     .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                     .expect(200, mealsOutput)
+            })
+        })
+    })
+
+    describe.only(`GET /api/meals/user`, () => {
+        context('Given no user meals', () => {
+            beforeEach('insert users', () => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+            })
+
+            it('responds with 200 and an empty list', () => {
+                return supertest(app)
+                    .get('/api/meals/user')
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .expect(200, {})
+            })
+        })
+
+        context(`Given user has meals`, () => {
+            const mealsOutput = helpers.makeMealsObject()
+            beforeEach('insert user, recipes, meals', () => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert(testRecipes)
+                            .then(() => {
+                                return db
+                                    .into('meals')
+                                    .insert(testMeals)
+                            })
+                    })
+            })
+
+            it(`responds with 200 and all the user meals`, () => {
+                return supertest(app)
+                    .get(`/api/meals/user`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .expect(200)
+                    .expect(res => {
+                        db
+                            .from('meals')
+                            .select('*')
+                            .where({user_id: testUsers[0].id})
+                            .first()
+                            .then( row => {
+                                expect(row.user_id).to.eql(testUsers[0].id)
+                            })
+                    })
             })
         })
     })
@@ -167,10 +220,9 @@ describe(` Meals Endpoints`, () => {
                 day: 'Test title',
                 recipe_id: 1
             }
-        
 
             it(`responds with 400 and an error message when '${field}' is missing`, () => {
-                delete newRecipe[field]
+                delete newMeal[field]
 
                 return supertest(app)
                     .post('/api/meals')

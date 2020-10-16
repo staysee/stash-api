@@ -110,18 +110,18 @@ function makeUsersArray() {
     return [
         {
             id: 1,
-            username: 'janedoe@test.com',
+            username: 'janedoe',
             firstname: 'Jane',
             lastname: 'Doe',
-            password: bcrypt.hashSync('password', 1),
+            password: bcrypt.hashSync('password1', 1),
             date_created: new Date('2029-01-22T16:28:32.615Z')
         },
         {
             id: 2,
-            username: 'johndoe@test.com',
+            username: 'johndoe',
             firstname: 'John',
             lastname: 'Doe',
-            password: bcrypt.hashSync('password', 1),
+            password: bcrypt.hashSync('password1', 1),
             date_created: new Date('2100-05-22T16:28:32.615Z')
 
         }
@@ -135,17 +135,13 @@ function makeRecipesFixtures() {
     return { testUsers, testRecipes, testMeals }
 }
 
-// function makeAuthHeader(user, secret=process.env.JWT_SECRET) {
-//     const token = jwt.sign({ user_id: user.id }, secret, {
-//       subject: user.username,
-//       algorithm: 'HS256',
-//     })
-//     return `Bearer ${token}`
-//   }
-function makeAuthHeader(user){
-    const token = Buffer.from(`${user.username}:${user.password}`).toString('base64')
-    return `Basic ${token}`
-}
+function makeAuthHeader(user, secret=process.env.JWT_SECRET) {
+    const token = jwt.sign({ user_id: user.id }, secret, {
+      subject: user.username,
+      algorithm: 'HS256',
+    })
+    return `Bearer ${token}`
+  }
 
 module.exports = {
     makeMealsArray,

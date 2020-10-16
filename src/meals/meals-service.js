@@ -1,7 +1,12 @@
 const MealsService = {
     getAllMeals(knex) {
         return knex.select('*').from('meals')
-    },            
+    }, 
+    getUserMeals(knex, userId) {
+        return knex('meals')
+            .where({user_id: userId})
+            .select('*')
+    },        
     insertMeal(knex, newMeal) {
         return knex
             .insert(newMeal)

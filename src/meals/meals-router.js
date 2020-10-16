@@ -51,6 +51,20 @@ mealsRouter
     })
 
 mealsRouter
+    .route('/user')
+    .all(requireAuth)
+    .get((req, res, next) => {
+        const knexInstance = req.app.get('db')
+        MealsService.getUserMeals(knexInstance, req.user.id)
+            .then(meals => {
+                res.json(meals.reduce((acc, item) => ({
+                    ...acc, [item.day]: meals.filter( (i) => i.day === item.day)
+                }), {} ))
+            })
+            .catch(next)
+    })
+
+mealsRouter
     .route('/:meal_id')
     .all(requireAuth)
     .all((req, res, next) => {

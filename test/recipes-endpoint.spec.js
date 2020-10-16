@@ -3,6 +3,7 @@ const knex = require('knex')
 const app = require('../src/app')
 const supertest = require('supertest')
 const helpers = require('./test-helpers')
+const { contentSecurityPolicy } = require('helmet')
 
 
 describe('Recipes Endpoints', function() {
@@ -95,6 +96,53 @@ describe('Recipes Endpoints', function() {
         })
     })
 
+    describe(`GET /api/recipes/user`, () => {
+        context(`Given a user has no recipes`, () => {
+            beforeEach(() => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+            })
+
+            it('responds with 200 and an empty list', () => {
+                return supertest(app)
+                    .get('/api/recipes/user')
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .expect(200, [])
+            })
+        })
+
+        context('Given a user has recipes', () => {
+            beforeEach('insert recipes', () => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert(testRecipes)
+                    })
+            })
+    
+            it('responds with 200 and the user recipes', () => {
+                return supertest(app)
+                    .get('/api/recipes/user')
+                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .expect(200)
+                    .expect(res => {
+                        db
+                            .from('recipes')
+                            .select('*')
+                            .where({user_id: testUsers[0].id})
+                            .first()
+                            .then( row => {
+                                expect(row.user_id).to.eql(testUsers[0].id)
+                            })
+                    })
+            })
+        })
+    })
+
     describe(`GET /api/recipes/:id`, () => {
         context('Given no recipes', () => {
             beforeEach(() => {
@@ -162,7 +210,7 @@ describe('Recipes Endpoints', function() {
     })
 
     describe(`POST /api/recipes`, () => {
-        beforeEach('insert malicious recipe', () => {
+        beforeEach('', () => {
             return db
                 .into('users')
                 .insert(testUsers)
@@ -188,6 +236,7 @@ describe('Recipes Endpoints', function() {
                     expect(res.body.instructions).to.eql(newRecipe.instructions)
                     expect(res.body.meal_type).to.eql(newRecipe.meal_type)
                     expect(res.body.image_url).to.eql(newRecipe.image_url)
+                    expect(res.body.user_id).to.eql(testUsers[0].id)
                     expect(res.body).to.have.property('id')
                     expect(res.headers.location).to.eql(`/api/recipes/${res.body.id}`)
                     const expected = new Date().toLocaleString()

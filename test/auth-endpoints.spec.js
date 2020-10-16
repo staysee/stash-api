@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe.only('Auth Endpoints', function () {
+describe('Auth Endpoints', function () {
     let db 
 
     const {
@@ -54,22 +54,22 @@ describe.only('Auth Endpoints', function () {
                     })
             })
 
-            it(`responds 400 'invalid username or password' when bad username`, () => {
+            it(`responds 401 'invalid username or password' when bad username`, () => {
                 const userInvalidUser = { username: 'user-not', password: 'existy' }
                 return supertest(app)
                     .post('/api/auth/login')
                     .send(userInvalidUser)
-                    .expect(400, {
+                    .expect(401, {
                         error: `Incorrect username or password`
                     })
             })
 
-            it(`responds 400 'invalid username or password' when bad password`, () => {
+            it(`responds 401 'invalid username or password' when bad password`, () => {
                 const userInvalidPass = { username: testUser.username, password: 'incorrect' }
                 return supertest(app)
                     .post('/api/auth/login')
                     .send(userInvalidPass)
-                    .expect(400, { error: `Incorrect username or password` })
+                    .expect(401, { error: `Incorrect username or password` })
             })
 
             it(`responds 200 and JWT auth token using secret when valid credentials`, () => {
@@ -86,6 +86,7 @@ describe.only('Auth Endpoints', function () {
                     }
                 )
                 return supertest(app)
+                    console.log('TEST ONLY PASSES WHEN SOMETHING IS HERE')
                     .post('/api/auth/login')
                     .send(userValidCreds)
                     .expect(200, {
