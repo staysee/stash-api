@@ -1,12 +1,18 @@
 const UsersService = require('../src/users/users-service')
 const knex = require('knex')
 const { expect } = require('chai')
-const { makeUsersArray, makeRecipesArray, makeMealsArray, makeMealsObject } = require('./test-helpers')
+const helpers = require('./test-helpers')
 
 
 describe(`Users Service object`, () => {
     let db
     
+    const {
+        testUsers,
+        testRecipes,
+        testMeals
+    } = helpers.makeRecipesFixtures()
+
     before(() => {
         db = knex({
             client: 'pg',
@@ -20,10 +26,6 @@ describe(`Users Service object`, () => {
     after(() => db.destroy())
 
     context(`Given 'users' has data`, () => {
-        const testUsers = makeUsersArray()
-        const testRecipes = makeRecipesArray()
-        const testMeals = makeMealsArray()
-
         beforeEach(() => {
             return db
                 .into('users')
@@ -72,7 +74,7 @@ describe(`Users Service object`, () => {
 
         it(`updateUser() updates a user`, () => {
             const idOfUserToUpdate = 1
-            const userMeals = makeMealsObject()
+            const userMeals = helpers.makeMealsObject()
             const newUserData = {
                 username: 'username',
                 firstname: 'firstname',

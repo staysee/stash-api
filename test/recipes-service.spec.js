@@ -1,11 +1,15 @@
 const RecipesService = require('../src/recipes/recipes-service')
 const knex = require('knex')
 const { expect } = require('chai')
-const { makeUsersArray, makeRecipesArray } = require('./test-helpers')
-const { getAllRecipes } = require('../src/recipes/recipes-service')
+const helpers = require('./test-helpers')
 
 describe(`Recipes service object`, function() {
     let db
+
+    const {
+        testUsers,
+        testRecipes
+    } = helpers.makeRecipesFixtures()
 
     before('setup db', () => {
         db = knex({
@@ -22,9 +26,6 @@ describe(`Recipes service object`, function() {
 
     
     context(`Given 'recipes' has data`, () => {
-        const testUsers = makeUsersArray()
-        const testRecipes = makeRecipesArray()
-
         beforeEach('insert recipes', () => {
             return db
                 .into('users')
@@ -95,8 +96,6 @@ describe(`Recipes service object`, function() {
     })
 
     context(`Given 'recipes' has no data`, () => {
-        const testUsers = makeUsersArray()
-
         beforeEach(() => {
             return db
                 .into('users')

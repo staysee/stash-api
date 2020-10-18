@@ -3,8 +3,6 @@ const knex = require('knex')
 const app = require('../src/app')
 const supertest = require('supertest')
 const helpers = require('./test-helpers')
-const { contentSecurityPolicy } = require('helmet')
-
 
 describe('Recipes Endpoints', function() {
     let db
