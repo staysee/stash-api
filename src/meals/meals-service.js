@@ -32,6 +32,14 @@ const MealsService = {
         return knex('meals')
         .where({ id })
         .update(newMealFields)
+    },
+    serializeMeal(meal) {
+        return {
+            id: meal.id,
+            day: meal.day,
+            recipe_id: meal.recipe_id,
+            user_id: meal.user_id
+        }
     }
 }
 

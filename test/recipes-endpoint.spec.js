@@ -136,8 +136,6 @@ describe('Recipes Endpoints', function() {
                             .where({user_id: testUsers[0].id})
                             .first()
                             .then( row => {
-                                expect(row.day).to.eql(newMeal.day)
-                                expect(row.recipe_id).to.eql(newMeal.recipe_id)
                                 expect(row.user_id).to.eql(testUsers[0].id)
                             })
                     })

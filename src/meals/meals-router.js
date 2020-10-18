@@ -6,13 +6,6 @@ const { requireAuth } = require('../middleware/jwt-auth')
 const mealsRouter = express.Router()
 const jsonParser = express.json()
 
-const serializeMeal = meal => ({
-    id: meal.id,
-    day: meal.day,
-    recipe_id: meal.recipe_id,
-    user_id: meal.user_id
-})
-
 mealsRouter
     .route('/')
     .all(requireAuth)
@@ -20,7 +13,6 @@ mealsRouter
         const knexInstance = req.app.get('db')
         MealsService.getAllMeals(knexInstance)
             .then(meals => {
-                // res.json(meals.map(serializeMeal))
                 res.json(meals.reduce((acc, item) => ({
                     ...acc, [item.day]: meals.filter( (i) => i.day === item.day)
                 }), {} ))
@@ -47,7 +39,7 @@ mealsRouter
                 res
                     .status(201)
                     .location(path.posix.join(req.originalUrl, `/${meal.id}`))
-                    .json(serializeMeal(meal))
+                    .json(MealsService.serializeMeal(meal))
             })
             .catch(next)
     })
@@ -84,7 +76,7 @@ mealsRouter
             .catch(next)
     })
     .get((req, res, next) => {
-        res.json(serializeMeal(res.meal))
+        res.json(MealsService.serializeMeal(res.meal))
     })
     .delete((req, res, next) => {
         const knexInstance = req.app.get('db')

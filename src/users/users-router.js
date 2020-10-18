@@ -1,22 +1,9 @@
-const path = require('path')
 const express = require('express')
-const xss = require('xss')
+const path = require('path')
 const UsersService = require('./users-service')
-const { json } = require('express')
-const bcrypt = require('bcryptjs')
 
 const usersRouter = express.Router()
 const jsonBodyParser = express.json()
-
-const serializeUser = user => ({
-    id: user.id,
-    username: xss(user.username),
-    firstname: xss(user.firstname),
-    lastname: xss(user.lastname),
-    date_created: user.date_created,
-    recipes: user.recipes,
-    meals: user.meals
-})
 
 usersRouter
     .route('/')
@@ -24,32 +11,52 @@ usersRouter
         const knexInstance = req.app.get('db')
         UsersService.getAllUsers(knexInstance)
             .then(users => {
-                // res.json(users.map(serializeUser))
                 res.json(users)
             })
             .catch(next)
     })
-    .post(jsonBodyParser, async (req, res, next) => {
+    .post(jsonBodyParser, (req, res, next) => {
         const { username, firstname, lastname, password } = req.body
-        const newUser = { username, firstname, lastname }
+        const newUser = { username, firstname, lastname, password }
 
         for (const [key, value] of Object.entries(newUser)) {
             if (value == null) {
                 return res.status(400).json({
-                    error: { message: `Missing '${key}' in request body` }
+                    error: `Missing '${key}' in request body`
                 })
             }
         }
 
-        newUser.password = await bcrypt.hash(password, 12)
+        const passwordError = UsersService.validatePassword(password)
 
-        const knexInstance = req.app.get('db')
-        UsersService.insertUser(knexInstance, newUser)
-            .then(user => {
-                res
-                    .status(201)
-                    .location(path.posix.join(req.originalUrl, `/${user.id}`))
-                    .json(serializeUser(user))
+        if (passwordError)
+            return res.status(400).json({ error: passwordError})
+
+        UsersService.hasUserWithUsername(req.app.get('db'), username)
+            .then(hasUserWithUsername => {
+                if (hasUserWithUsername)
+                    return res.status(400).json({ error: `Username already taken` })
+
+                    return UsersService.hashPassword(password)
+                        .then(hashedPassword => {
+                            const newUser = {
+                                username,
+                                password: hashedPassword,
+                                firstname,
+                                lastname,
+                                date_create: 'now()'
+                            }
+                        
+
+                            return UsersService.insertUser(
+                                req.app.get('db'), newUser
+                            )
+                            .then(user => {
+                                res.status(201)
+                                .location(path.posix.join(req.originalUrl, `/${user.id}`))
+                                .json(UsersService.serializeUser(user))
+                            })
+                        })
             })
             .catch(next)
     })
@@ -61,9 +68,7 @@ usersRouter
         UsersService.getById(knexInstance, req.params.user_id)
             .then(user => {
                 if (!user) {
-                    return res.status(404).json({
-                        error: { message: `User doesn't exist` }
-                    })
+                    return res.status(404).json({ error: `User doesn't exist` })
                 }
                 res.user = user
                 next()
@@ -71,7 +76,6 @@ usersRouter
             .catch(next)
     })
     .get((req, res, next) => {
-        // res.json(serializeUser(res.user))
         res.json(res.user)
     })
     .delete((req, res, next) => {
@@ -89,9 +93,7 @@ usersRouter
         const numberOfValues = Object.values(userToUpdate).filter(Boolean).length
         if (numberOfValues === 0)
         return res.status(400).json({
-            error: {
-                message: `Request body must contain either 'username', 'firstname', 'lastname', or 'password'`
-            }
+            error: `Request body must contain either 'username', 'firstname', 'lastname', or 'password'`
         })
 
         const knexInstance = req.app.get('db')

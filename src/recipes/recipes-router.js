@@ -2,26 +2,12 @@ const path = require('path')
 const express = require('express')
 const { v4: uuid } = require('uuid')
 const logger = require('../logger')
-const xss = require('xss')
 const { end } = require('../logger')
 const RecipesService = require('./recipes-service')
 const { requireAuth } = require('../middleware/jwt-auth')
 
 const recipesRouter = express.Router()
 const jsonParser = express.json()
-
-const serializeRecipe = recipe => ({
-    id: recipe.id,
-    title: xss(recipe.title),
-    ingredients: xss(recipe.ingredients),
-    instructions: xss(recipe.instructions),
-    meal_type: recipe.meal_type,
-    image_url: recipe.image_url,
-    date_created: recipe.date_created,
-    user_id: recipe.user_id
-})
-
-
 
 recipesRouter
     .route('/')
@@ -30,12 +16,11 @@ recipesRouter
         const knexInstance = req.app.get('db')
         RecipesService.getAllRecipes(knexInstance)
         .then(recipes => {
-            res.json(recipes.map(serializeRecipe))
+            res.json(recipes.map(RecipesService.serializeRecipe))
         })
         .catch(next)
     })
     .post(jsonParser, (req, res, next) => {
-        // get the data
         const { title, ingredients, instructions, meal_type, image_url } = req.body
         const newRecipe = { title, ingredients, instructions, meal_type, image_url }
         const knexInstance = req.app.get('db')
@@ -55,7 +40,7 @@ recipesRouter
             res
             .status(201)
             .location(path.posix.join(req.originalUrl + `/${recipe.id}`))
-            .json(serializeRecipe(recipe))
+            .json(RecipesService.serializeRecipe(recipe))
         })
         .catch(next)
     })
@@ -68,7 +53,7 @@ recipesRouter
         
         RecipesService.getUserRecipes(knexInstance, req.user.id)
             .then(recipes => {
-                res.json(recipes.map(serializeRecipe))
+                res.json(recipes.map(RecipesService.serializeRecipe))
             })
             .catch(next)
     })
@@ -92,7 +77,7 @@ recipesRouter
     })
     .get((req, res, next) => {
         const { recipe } = res;
-        res.json(serializeRecipe(recipe))
+        res.json(RecipesService.serializeRecipe(recipe))
     })
     .delete((req, res, next) => {
         const knexInstance = req.app.get('db')
@@ -101,7 +86,6 @@ recipesRouter
             return res.status(204).json({ message: `Recipe with id ${req.params.id} was deleted.`})
         })
         .catch(next)
-        
         logger.info(`Recipe with id ${id} deleted.`)
         
     })
