@@ -1,6 +1,5 @@
 const MealsService = require('../src/meals/meals-service')
 const knex = require('knex')
-const { expect } = require('chai')
 const helpers = require('./test-helpers')
 
 

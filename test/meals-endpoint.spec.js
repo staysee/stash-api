@@ -1,6 +1,4 @@
-const { expect } = require('chai')
 const knex = require('knex')
-const supertest = require('supertest')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
@@ -149,6 +147,7 @@ describe(` Meals Endpoints`, () => {
                     .expect(404, { error: { message: `Meal doesn't exist` } })
             })
         })
+
         context('Given there are meals in the database', () => {                
             beforeEach('insert meals', () => {
                 return db
@@ -168,6 +167,7 @@ describe(` Meals Endpoints`, () => {
             it ('responds with 200 and the specified meal', () => {
                 const mealId = 2
                 const expectedMeal = testMeals[mealId - 1]
+            
                 return supertest(app)
                     .get(`/api/meals/${mealId}`)
                     .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
@@ -193,13 +193,14 @@ describe(` Meals Endpoints`, () => {
                 day: 'Saturday',
                 recipe_id: 2
             }
-
+            console.log(`USER`, testUsers[0])
             return supertest(app)
                 .post('/api/meals')
                 .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                 .send(newMeal)
                 .expect(201)
                 .expect(res => {
+                    console.log(`BODY`, res.body)
                     expect(res.body.day).to.eql(newMeal.day)
                     expect(res.body.recipe_id).to.eql(newMeal.recipe_id)
                     expect(res.body.user_id).to.eql(testUser.id)

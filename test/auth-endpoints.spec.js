@@ -45,7 +45,7 @@ describe('Auth Endpoints', function () {
 
             it(`responds with 400 required error when '${field}' is missing`, () => {
                 delete loginAttemptBody[field]
-
+                
                 return supertest(app)
                     .post('/api/auth/login')
                     .send(loginAttemptBody)
@@ -85,6 +85,7 @@ describe('Auth Endpoints', function () {
                         algorithm: 'HS256'
                     }
                 )
+                console.log(`EXPECT`, expectedToken)
                 return supertest(app)
                     .post('/api/auth/login')
                     .send(userValidCreds)

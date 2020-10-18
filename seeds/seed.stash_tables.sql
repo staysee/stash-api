@@ -15,9 +15,9 @@ VALUES
 INSERT INTO users
   (username, firstname, lastname, password)
 VALUES
-  ('janedoe', 'Jane', 'Doe', 'password'),
-  ('johnny', 'John', 'Doe', 'password'),
-  ('bettyboop', 'Betty', 'Boop', 'password');
+  ('janedoe', 'Jane', 'Doe', '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e'),
+  ('johndoe', 'John', 'Doe', '$$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e'),
+  ('demouser', 'Demo', 'User', '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e');
 
 INSERT INTO meals
   (day, recipe_id, user_id)

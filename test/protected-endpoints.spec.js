@@ -45,7 +45,7 @@ describe(`Protected endpoints`, () => {
     const protectedEndpoints = [
         {
             name: 'GET /api/recipes',
-            path: '/api/recipes/',
+            path: '/api/recipes',
             method: supertest(app).get
         },
         {
@@ -90,7 +90,7 @@ describe(`Protected endpoints`, () => {
         },
         {
             name: 'POST /api/meals',
-            path: '/api/meals/',
+            path: '/api/meals',
             method: supertest(app).post
         },
         {

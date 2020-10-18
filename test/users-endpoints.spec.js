@@ -1,11 +1,9 @@
 const knex = require('knex')
 const bcrypt = require('bcryptjs')
-const { expect } = require('chai')
-const supertest = require('supertest')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe(`Users Endpoints`, () => {
+describe.only(`Users Endpoints`, () => {
     let db
 
     const { testUsers } = helpers.makeRecipesFixtures()

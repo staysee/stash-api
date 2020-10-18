@@ -223,12 +223,15 @@ describe('Recipes Endpoints', function() {
                 meal_type: 'Breakfast',
                 image_url: 'https://via.placeholder.com/100'
             }
+            console.log(`NEW RECIPE`, newRecipe)
+            console.log(`TESTUSER`, testUsers[0])
             return supertest(app)
                 .post('/api/recipes')
                 .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                 .send(newRecipe)
                 .expect(201)
                 .expect( res => {
+                    console.log(`RES`, res.body)
                     expect(res.body.title).to.eql(newRecipe.title)
                     expect(res.body.ingredients).to.eql(newRecipe.ingredients)
                     expect(res.body.instructions).to.eql(newRecipe.instructions)
