@@ -176,7 +176,7 @@ describe(` Meals Endpoints`, () => {
         })
     })
 
-    describe.only(`POST /api/meals`, () => {
+    describe(`POST /api/meals`, () => {
         before('insert users and recipes', () => {
             return db
                 .into('users')
@@ -224,7 +224,7 @@ describe(` Meals Endpoints`, () => {
 
             it(`responds with 400 and an error message when '${field}' is missing`, () => {
                 delete newMeal[field]
-
+                console.log(`NEW MEAL`, newMeal)
                 return supertest(app)
                     .post('/api/meals')
                     .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
