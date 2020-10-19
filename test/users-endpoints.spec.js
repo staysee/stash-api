@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
 
-describe.only(`Users Endpoints`, () => {
+describe(`Users Endpoints`, () => {
     let db
 
     const { testUsers } = helpers.makeRecipesFixtures()
@@ -131,7 +131,7 @@ describe.only(`Users Endpoints`, () => {
             })
         })
 
-        context(`Happy path`, () => {
+        context.only(`Happy path`, () => {
             it(`responds 201, serialized user, storing bcrypted password`, () => {
                 const newUser = {
                     username: 'test username',
