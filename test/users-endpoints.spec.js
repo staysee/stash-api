@@ -135,7 +135,9 @@ describe(`Users Endpoints`, () => {
             it(`responds 201, serialized user, storing bcrypted password`, () => {
                 const newUser = {
                     username: 'test username',
-                    password: '11AAaa!!'
+                    password: '11AAaa!!',
+                    firstname: 'testuser firstname',
+                    lastname: 'testuser lastname'
                 }
                 
                 return supertest(app)
@@ -145,8 +147,8 @@ describe(`Users Endpoints`, () => {
                     .expect(res => {
                         expect(res.body).to.have.property('id')
                         expect(res.body.username).to.eql(newUser.username)
-                        expect(res.body.firstname).to.eql('')
-                        expect(res.body.lastname).to.eql('')
+                        expect(res.body.firstname).to.eql(newUser.firstname)
+                        expect(res.body.lastname).to.eql(newUser.lastname)
                         expect(res.body).to.not.have.property('password')
                         expect(res.headers.location).to.eql(`/api/users/${res.body.id}`)
                         const expectedDate = new Date().toLocaleString('en', { timeZone: 'UTC'})
@@ -161,8 +163,8 @@ describe(`Users Endpoints`, () => {
                             .first()
                             .then(row => {
                                 expect(row.username).to.eql(newUser.username)
-                                expect(row.firstname).to.eql(null)
-                                expect(row.lastname).to.eql(null)
+                                expect(row.firstname).to.eql(newUser.firstname)
+                                expect(row.lastname).to.eql(newUser.lastname)
                                 const expectedDate = new Date.toLocaleString('en', { timeZone: 'UTC' })
                                 const actualDate = new Date(row.date_created).toLocaleString()
                                 expect(actualDate).to.eql(expectedDate)
