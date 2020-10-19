@@ -87,7 +87,7 @@ describe.only(`Users Endpoints`, () => {
                     return supertest(app)
                         .post('/api/users')
                         .send('userPasswordStartsSpaces')
-                        .expect(400, { error: `Password must not start or end with empty spaces`})
+                        .expect(400, { error: `Password must not start or end with spaces`})
                 })
 
                 it(`responds 400 error when password ends with spaces`, () => {
@@ -99,8 +99,8 @@ describe.only(`Users Endpoints`, () => {
                     }
                     return supertest(app)
                         .post('/api/users')
-                        .send('userPasswordStartsSpaces')
-                        .expect(400, { error: `Password must not start or end with empty spaces`})
+                        .send(userPasswordStartsSpaces)
+                        .expect(400, { error: `Password must not start or end with spaces`})
                 })
 
                 it(`responds 400 error when password isn't complex enough`, () => {

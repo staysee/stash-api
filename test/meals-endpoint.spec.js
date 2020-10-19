@@ -176,7 +176,7 @@ describe(` Meals Endpoints`, () => {
         })
     })
 
-    describe(`POST /api/meals`, () => {
+    describe.only(`POST /api/meals`, () => {
         before('insert users and recipes', () => {
             return db
                 .into('users')
@@ -193,14 +193,13 @@ describe(` Meals Endpoints`, () => {
                 day: 'Saturday',
                 recipe_id: 2
             }
-            console.log(`USER`, testUsers[0])
+            
             return supertest(app)
                 .post('/api/meals')
                 .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
                 .send(newMeal)
                 .expect(201)
                 .expect(res => {
-                    console.log(`BODY`, res.body)
                     expect(res.body.day).to.eql(newMeal.day)
                     expect(res.body.recipe_id).to.eql(newMeal.recipe_id)
                     expect(res.body.user_id).to.eql(testUser.id)
