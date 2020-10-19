@@ -86,7 +86,7 @@ describe.only(`Users Endpoints`, () => {
                     }
                     return supertest(app)
                         .post('/api/users')
-                        .send('userPasswordStartsSpaces')
+                        .send(userPasswordStartsSpaces)
                         .expect(400, { error: `Password must not start or end with spaces`})
                 })
 
