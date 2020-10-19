@@ -44,7 +44,7 @@ usersRouter
                                 password: hashedPassword,
                                 firstname,
                                 lastname,
-                                date_created: 'now()'
+                                // date_created: 'now()'
                             }
                         
 

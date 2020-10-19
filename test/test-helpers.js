@@ -113,21 +113,24 @@ function makeUsersArray(){
             username: 'janedoe',
             firstname: 'Jane',
             lastname: 'Doe',
-            password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e'
+            password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e',
+            date_created: new Date('2029-01-22T16:28:32.615Z')
         },
         {
             id: 2,
             username: 'johndoe',
             firstname: 'John',
             lastname: 'Doe',
-            password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e'
+            password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e',
+            date_created: new Date('2029-01-22T16:28:32.615Z')
         },
         {
             id: 3,
             username: 'testuser',
             firstname: 'Test',
             lastname: 'User',
-            password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e'
+            password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e',
+            date_created: new Date('2029-01-22T16:28:32.615Z')
         }
     ]
 }
