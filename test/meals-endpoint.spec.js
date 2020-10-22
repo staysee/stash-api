@@ -188,7 +188,7 @@ describe(` Meals Endpoints`, () => {
                 })
         })
 
-        it.only('creates a meal, responding with 201 and the new meal', () => {
+        it('creates a meal, responding with 201 and the new meal', () => {
             const newMeal = {
                 day: 'Saturday',
                 recipe_id: 2
