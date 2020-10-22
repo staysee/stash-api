@@ -9,7 +9,7 @@ function requireAuth(req, res, next) {
     } else {
         bearerToken = authToken.slice(7, authToken.length)
     }
-
+    console.log(`BEARER TOKEN `, bearerToken)
     try {
         const payload = AuthService.verifyJwt(bearerToken)
 
@@ -18,9 +18,11 @@ function requireAuth(req, res, next) {
             payload.sub
         )
             .then(user => {
-                if (!user)
+                console.log(`PAYLOAD `, payload)
+                if (!user) {
                     return res.status(401).json({ error: 'Unauthorized request' })
-               
+                }
+                
                 req.user = user
                 next()
             })

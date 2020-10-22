@@ -106,31 +106,40 @@ function makeMaliciousRecipe() {
     }
 }
 
-function makeUsersArray(){
+// Matches the users we seeded
+function existingUsersArray(){
     return [
         {
             id: 1,
             username: 'janedoe',
-            firstname: 'Jane',
-            lastname: 'Doe',
-            password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e',
-            date_created: new Date('2029-01-22T16:28:32.615Z')
+            password: 'password1',
         },
         {
             id: 2,
             username: 'johndoe',
-            firstname: 'John',
-            lastname: 'Doe',
-            password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e',
-            date_created: new Date('2029-01-22T16:28:32.615Z')
+            password: 'password1',
         },
         {
             id: 3,
             username: 'testuser',
-            firstname: 'Test',
+            password: 'password1',
+        }
+    ]
+}
+
+function makeUsersArray(){
+    return [
+        {
+            username: 'demouser',
+            firstname: 'Demo',
             lastname: 'User',
-            password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e',
-            date_created: new Date('2029-01-22T16:28:32.615Z')
+            password: bcrypt.hashSync('password1', 12)
+        },
+        {
+            username: 'stashadmin',
+            firstname: 'Stash',
+            lastname: 'Admin',
+            password: bcrypt.hashSync('password1', 12),
         }
     ]
 }

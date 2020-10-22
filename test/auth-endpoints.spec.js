@@ -2,6 +2,7 @@ const knex = require('knex')
 const jwt = require('jsonwebtoken')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
+const { expect } = require('chai')
 
 describe('Auth Endpoints', function () {
     let db 
@@ -75,23 +76,18 @@ describe('Auth Endpoints', function () {
             it(`responds 200 and JWT auth token using secret when valid credentials`, () => {
                 const userValidCreds = {
                     username: testUser.username,
-                    password: testUser.password
+                    password: 'password1'
                 }
-                const expectedToken = jwt.sign(
-                    { user_id: testUser.id },   //payload
-                    process.env.JWT_SECRET,
-                    {
-                        subject: testUser.username,
-                        algorithm: 'HS256'
-                    }
-                )
-                console.log(`EXPECT`, expectedToken)
+                
                 return supertest(app)
                     .post('/api/auth/login')
                     .send(userValidCreds)
-                    .expect(200, {
-                        authToken: expectedToken
+                    .expect(200)
+                    .then( res => {
+                        console.log(`res`, res.body)
+                        expect(res.body.authToken).to.not.eql(null)
                     })
+                 
             })
         })
     })

@@ -24,7 +24,7 @@ describe(` Meals Endpoints`, () => {
     after('disconnect from db', () => db.destroy())
     before('clean the table', () => db('meals').truncate())
     
-    afterEach('cleanup', () => db.raw('TRUNCATE recipes, users, meals RESTART IDENTITY CASCADE'))
+    afterEach('cleanup', () => db.raw('TRUNCATE recipes, users, meals CASCADE'))
 
     describe(`GET /api/meals`, () => {
         context('Given no meals', () => {
@@ -188,7 +188,7 @@ describe(` Meals Endpoints`, () => {
                 })
         })
 
-        it ('creates a meal, responding with 201 and the new meal', () => {
+        it.only('creates a meal, responding with 201 and the new meal', () => {
             const newMeal = {
                 day: 'Saturday',
                 recipe_id: 2
@@ -202,7 +202,7 @@ describe(` Meals Endpoints`, () => {
                 .expect(res => {
                     expect(res.body.day).to.eql(newMeal.day)
                     expect(res.body.recipe_id).to.eql(newMeal.recipe_id)
-                    expect(res.body.user_id).to.eql(testUser.id)
+                    expect(res.body.user_id).to.eql(1)
                     expect(res.body).to.have.property('id')
                     expect(res.headers.location).to.eql(`/api/meals/${res.body.id}`)
                 })
