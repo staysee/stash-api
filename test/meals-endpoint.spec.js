@@ -11,7 +11,7 @@ describe(` Meals Endpoints`, () => {
 
     const db = knex({
         client: 'pg',
-        connection: process.env.DATABASE_URL
+        connection: process.env.TEST_DATABASE_URL
     })
     app.set('db', db)
 
@@ -33,6 +33,7 @@ describe(` Meals Endpoints`, () => {
 
     describe(`GET /api/meals`, () => {
         context('Given no meals', () => {
+            //for no meals, we won't need before/after so these tests need to go in its own describe grouping
             it.skip('responds with 200 and an empty list', () => {
                 console.log(signedInUser.body.authToken);
                 return request

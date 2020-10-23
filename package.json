@@ -6,12 +6,12 @@
   "scripts": {
     "test": "mocha --require test/setup.js",
     "dev": "nodemon src/server.js",
-    "migrate": "NODE_ENV=dev postgrator --config postgrator-config.js",
+    "migrate": "postgrator --config postgrator-config.js",
     "migrate:test": "env NODE_ENV=test npm run migrate",
     "start": "node src/server.js",
     "predeploy": "npm audit",
     "deploy": "git push heroku master",
-    "dev:test": "npm run migrate && mocha --require test/setup.js test/meals-endpoint.spec.js"
+    "dev:test": "npm run migrate:test && mocha --require test/setup.js test/meals-endpoint.spec.js"
   },
   "keywords": [],
   "engines": {
