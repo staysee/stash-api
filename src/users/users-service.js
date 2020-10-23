@@ -21,8 +21,10 @@ const UsersService = {
             knex('meals').where('user_id', id).select('*')
         ])
 
-        user.recipes = userRecipes
-        user.meals = userMeals
+        if (user) {
+            user.recipes = userRecipes
+            user.meals = userMeals
+        }
 
         return user
     },

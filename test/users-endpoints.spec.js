@@ -63,7 +63,7 @@ describe(`Users Endpoints`, () => {
     })
 
     describe(`GET /api/users/:id`, () => {
-        context.skip('Given no users', () => {
+        context('Given no users', () => {
             it('responds with 404', () => {
                 const userId = 1234
                 return supertest(app)
@@ -269,7 +269,7 @@ describe(`Users Endpoints`, () => {
 
     describe(`DELETE /api/users/:id`, () => {
         context('Given no users', () => {
-            it.skip('responds with 404', () => {
+            it('responds with 404', () => {
                 const userId = 12345
                 return supertest(app)
                     .delete(`/api/users/${userId}`)

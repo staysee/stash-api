@@ -227,7 +227,7 @@ describe(` Meals Endpoints`, () => {
                 console.log(`NEW MEAL`, newMeal)
                 return supertest(app)
                     .post('/api/meals')
-                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .set(`Authorization`, helpers.makeAuthHeader(testUser))
                     .send(newMeal)
                     .expect(400, {
                         error: { message: `Missing '${field}' in request body` }

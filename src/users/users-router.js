@@ -65,6 +65,7 @@ usersRouter
     .route('/:user_id')
     .all((req, res, next) => {
         const knexInstance = req.app.get('db')
+    
         UsersService.getById(knexInstance, req.params.user_id)
             .then(user => {
                 if (!user) {
