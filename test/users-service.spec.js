@@ -43,10 +43,10 @@ describe(`Users Service object`, () => {
         })
 
         it(`getAllUsers() from 'users' table`, () => {
-            console.log(`users here:`, testUsers)
+            // console.log(`users here:`, testUsers)
             return UsersService.getAllUsers(db)
                 .then(actual => {
-                    console.log(`ACTUAL`, actual)
+                    // console.log(`ACTUAL`, actual)
                     expect(actual).to.eql(testUsers)
                 })
         })

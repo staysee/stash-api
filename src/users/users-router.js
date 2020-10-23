@@ -11,7 +11,7 @@ usersRouter
         const knexInstance = req.app.get('db')
         UsersService.getAllUsers(knexInstance)
             .then(users => {
-                res.json(users)
+                res.json(users.map(UsersService.serializeUser))
             })
             .catch(next)
     })

@@ -2,11 +2,18 @@ const knex = require('knex')
 const bcrypt = require('bcryptjs')
 const app = require('../src/app')
 const helpers = require('./test-helpers')
+const { expect } = require('chai')
+const { expectCt } = require('helmet')
+const supertest = require('supertest')
 
 describe(`Users Endpoints`, () => {
     let db
 
-    const { testUsers } = helpers.makeRecipesFixtures()
+    const { 
+        testUsers,
+        testRecipes,
+        testMeals
+     } = helpers.makeRecipesFixtures()
     const testUser = testUsers[0]
 
     before('make knex instance', () => {
@@ -22,6 +29,87 @@ describe(`Users Endpoints`, () => {
     before('clean the table', () => db.raw('TRUNCATE recipes, users, meals RESTART IDENTITY CASCADE'))
 
     afterEach('cleanup', () => db.raw('TRUNCATE recipes, users, meals RESTART IDENTITY CASCADE'))
+
+    describe(`GET /api/users`, () => {
+        context('Given no users', () => {
+
+            it('responds with 200 and an empty list', () => {
+                return supertest(app)
+                    .get('/api/users')
+                    .set(`Authorization`, helpers.makeAuthHeader(testUser))
+                    .expect(200, [])
+            })
+        })
+
+        context('Given there are users', () => {
+            beforeEach('insert users', () => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+            })
+
+            it('responds with 200 and all of the recipes', () => {
+                return supertest(app)
+                    .get('/api/users')
+                    .set('Authorization', helpers.makeAuthHeader(testUser))
+                    .expect(200)
+                    .expect(res => {
+                        expect(res.body[0].username).to.eql(testUsers[0].username)
+                        expect(res.body[0].firstname).to.eql(testUsers[0].firstname)
+                        expect(res.body[0].lastname).to.eql(testUsers[0].lastname)
+                    })
+            })
+        })
+    })
+
+    describe(`GET /api/users/:id`, () => {
+        context.skip('Given no users', () => {
+            it('responds with 404', () => {
+                const userId = 1234
+                return supertest(app)
+                    .get(`/api/users/${userId}`)
+                    .set('Authorization', helpers.makeAuthHeader(testUser))
+                    .expect(404, { error: `User doesn't exist` })
+            })
+        })
+
+        context('Given there are users', () => {
+            beforeEach('insert users', () => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert(testRecipes)
+                            .then(() => {
+                                return db
+                                    .into('meals')
+                                    .insert(testMeals)
+                            })
+
+                    })
+            })
+
+            it('responds with 200 and the specified user', () => {
+                const userId = 1
+                const expectedUser = testUsers.find(user => user.id === userId)
+                return supertest(app)
+                    .get(`/api/users/${userId}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUser))
+                    .expect(200)
+                    .expect(res => {
+                        // console.log(`RES`, res.body)
+                        expect(res.body.username).to.eql(expectedUser.username)
+                        expect(res.body.firstname).to.eql(expectedUser.firstname)
+                        expect(res.body.lastname).to.eql(expectedUser.lastname)
+                        expect(res.body).to.have.property('recipes')
+                        expect(res.body).to.have.property('meals')
+                    })
+            })
+
+        })
+    })
 
     describe(`POST /api/users`, () => {
         context(`User Validations`, () => {
@@ -175,6 +263,54 @@ describe(`Users Endpoints`, () => {
                                 expect(compareMatch).to.be.true
                             })
                     )
+            })
+        })
+    })
+
+    describe(`DELETE /api/users/:id`, () => {
+        context('Given no users', () => {
+            it.skip('responds with 404', () => {
+                const userId = 12345
+                return supertest(app)
+                    .delete(`/api/users/${userId}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUser))
+                    .expect(404, { error: `User doesn't exist` })
+            })
+        })
+
+        context('Given there are users', () => {
+            beforeEach('insert users with recipes and meals', () => {
+                return db
+                    .into('users')
+                    .insert(testUsers)
+                    .then(() => {
+                        return db
+                            .into('recipes')
+                            .insert(testRecipes)
+                            .then(() => {
+                                return db
+                                    .into('meals')
+                                    .insert(testMeals)
+                            })
+
+                    })
+            })
+
+            it('responds with 204 and removes the user', () => {
+                const idToRemove = 1
+                const expectedUsers = testUsers.filter(user => user.id !== idToRemove)
+
+                return supertest(app)
+                    .delete(`/api/users/${idToRemove}`)
+                    .set(`Authorization`, helpers.makeAuthHeader(testUser))
+                    .expect(204)
+                    .then(res => {
+                        supertest(app)
+                            .get(`/api/users`)
+                            .set(`Authorization`, helpers.makeAuthHeader(testUser))
+                            .expect(expectedUsers)
+
+                    })
             })
         })
     })
