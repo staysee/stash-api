@@ -25,7 +25,6 @@ describe('Auth Endpoints', function () {
     })
 
     after(async () => {
-        console.log('We run oooo');
         await helpers.destroyDatabase()
     })
 

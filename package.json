@@ -11,7 +11,7 @@
     "start": "node src/server.js",
     "predeploy": "npm audit",
     "deploy": "git push heroku master",
-    "dev:test": "npm run migrate && mocha --require test/setup.js test/auth-endpoints.spec.js"
+    "dev:test": "npm run migrate && mocha --require test/setup.js test/meals-endpoint.spec.js"
   },
   "keywords": [],
   "engines": {
