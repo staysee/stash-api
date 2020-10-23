@@ -1,34 +1,71 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const knex = require('knex')
 
-function makeMealsArray() {
-    return [
-        {
-            id: 1,
-            day: 'Monday',
-            recipe_id: 1,
-            user_id: 1
-        },
-        {
-            id: 2,
-            day: 'Tuesday',
-            recipe_id: 2,
-            user_id: 1
-        },
-        {
-            id: 3,
-            day: 'Tuesday',
-            recipe_id: 3,
-            user_id: 1
-        },
-        {
-            id: 4,
-            day: 'Wednesday',
-            recipe_id: 1,
-            user_id: 1
-        }
-    ];
+const db = knex({
+    client: 'pg',
+    connection: process.env.DATABASE_URL
+})
+
+async function initiateDatabase() {
+    await db.into('users').insert(users)
+    await db.into('recipes').insert(recipes)
+    await db.into('meals').insert(meals)
 }
+
+async function destroyDatabase() {
+    await db.raw('TRUNCATE recipes, users, meals RESTART IDENTITY CASCADE')
+    await db.destroy()
+}
+
+const users = [
+    {
+        username: 'janedoe',
+        firstname: 'Jane',
+        lastname: 'Doe',
+        password: '$2a$12$0qU91w.TIiPTs.DEeiUZzuacK2aCXw201VrEZDGV4pV6w7H1qM5aW'
+    },
+    {
+        username: 'johndoe',
+        firstname: 'John',
+        lastname: 'Doe',
+        password: '$2a$12$0qU91w.TIiPTs.DEeiUZzuacK2aCXw201VrEZDGV4pV6w7H1qM5aW'
+    },
+    {
+        username: 'testuser',
+        firstname: 'Test',
+        lastname: 'User',
+        password: '$2a$12$0qU91w.TIiPTs.DEeiUZzuacK2aCXw201VrEZDGV4pV6w7H1qM5aW',
+    }
+]
+
+const meals = [
+    {
+        id: 1,
+        day: 'Monday',
+        recipe_id: 1,
+        user_id: 1
+    },
+    {
+        id: 2,
+        day: 'Tuesday',
+        recipe_id: 2,
+        user_id: 1
+    },
+    {
+        id: 3,
+        day: 'Tuesday',
+        recipe_id: 3,
+        user_id: 1
+    },
+    {
+        id: 4,
+        day: 'Wednesday',
+        recipe_id: 1,
+        user_id: 1
+    }
+];
+
 
 function makeMealsObject() {
     return { 
@@ -44,40 +81,34 @@ function makeMealsObject() {
         }
 }
 
-function makeRecipesArray() {
-    return [
-        {
-            id: 1,
-            title: 'First Test Recipe',
-            ingredients: 'Some test ingredients',
-            instructions: 'Some test instructions',
-            meal_type: 'Breakfast',
-            image_url: 'https://via.placeholder.com/100',
-            date_created: '2029-01-22T16:28:32.615Z',
-            user_id: 1
-        },
-        {
-            id: 2,
-            title: 'Second Test Recipe',
-            ingredients: 'Some test ingredients',
-            instructions: 'Some test instructions',
-            meal_type: 'Lunch',
-            image_url: 'https://via.placeholder.com/100',
-            date_created: '2029-01-22T16:28:32.615Z',
-            user_id: 2
-        },
-        {
-            id: 3,
-            title: 'Third Test Recipe',
-            ingredients: 'Some test ingredients',
-            instructions: 'Some test instructions',
-            meal_type: 'Dinner',
-            image_url: 'https://via.placeholder.com/100',
-            date_created: '2029-01-22T16:28:32.615Z',
-            user_id: 1
-        }
-    ];
-}
+const recipes = [
+    {
+
+        title: 'First Test Recipe',
+        ingredients: 'Some test ingredients',
+        instructions: 'Some test instructions',
+        meal_type: 'Breakfast',
+        image_url: 'https://via.placeholder.com/100',
+        user_id: 1
+    },
+    {
+        title: 'Second Test Recipe',
+        ingredients: 'Some test ingredients',
+        instructions: 'Some test instructions',
+        meal_type: 'Lunch',
+        image_url: 'https://via.placeholder.com/100',
+        user_id: 2
+    },
+    {
+        title: 'Third Test Recipe',
+        ingredients: 'Some test ingredients',
+        instructions: 'Some test instructions',
+        meal_type: 'Dinner',
+        image_url: 'https://via.placeholder.com/100',
+        user_id: 1
+    }
+];
+
 
 function makeMaliciousRecipe() {
     const maliciousRecipe = {
@@ -106,34 +137,6 @@ function makeMaliciousRecipe() {
     }
 }
 
-function makeUsersArray(){
-    return [
-        {
-            id: 1,
-            username: 'janedoe',
-            firstname: 'Jane',
-            lastname: 'Doe',
-            password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e',
-            date_created: new Date('2029-01-22T16:28:32.615Z')
-        },
-        {
-            id: 2,
-            username: 'johndoe',
-            firstname: 'John',
-            lastname: 'Doe',
-            password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e',
-            date_created: new Date('2029-01-22T16:28:32.615Z')
-        },
-        {
-            id: 3,
-            username: 'testuser',
-            firstname: 'Test',
-            lastname: 'User',
-            password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e',
-            date_created: new Date('2029-01-22T16:28:32.615Z')
-        }
-    ]
-}
 
 function makeRecipesFixtures() {
     const testUsers = makeUsersArray()
@@ -156,12 +159,10 @@ function makeAuthHeader(user, secret=process.env.JWT_SECRET) {
   }
 
 module.exports = {
-    makeMealsArray,
     makeMealsObject,
-    makeRecipesArray,
     makeMaliciousRecipe,
-    makeUsersArray,
-
+    initiateDatabase,
+    destroyDatabase,
     makeRecipesFixtures,
     makeAuthHeader
 }
