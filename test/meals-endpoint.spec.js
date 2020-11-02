@@ -214,27 +214,38 @@ describe(` Meals Endpoints`, () => {
                 )
         })
 
+        const token = helpers.makeAuthHeader(testUser)
+
         const requiredFields = ['day', 'recipe_id']
 
-        requiredFields.forEach(field => {
+        // requiredFields.forEach(field => {
+        //     const newMeal = {
+        //         day: 'Test title',
+        //         recipe_id: 1
+        //     }
+        for (let field of requiredFields) {
             const newMeal = {
                 day: 'Test title',
                 recipe_id: 1
             }
+        
 
-            it.skip(`responds with 400 and an error message when '${field}' is missing`, () => {
+            it.only(`responds with 400 and an error message when '${field}' is missing`, () => {
                 delete newMeal[field]
                 console.log(`NEW MEAL`, newMeal)
+                console.log(`TOKEN`, token)
                 return supertest(app)
                     .post('/api/meals')
-                    .set(`Authorization`, helpers.makeAuthHeader(testUser))
+                    .set(`Authorization`, token)
                     .send(newMeal)
                     .expect(400, {
                         error: { message: `Missing '${field}' in request body` }
                     })
             })
-        })
+        }
+        // })
     })
+
 
     describe(`DELETE /api/meals/:id`, () => {
         context('Given no meals', () => {
