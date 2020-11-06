@@ -12,6 +12,7 @@ describe(` Meals Endpoints`, () => {
         testMeals } = helpers.makeRecipesFixtures()
     
     const testUser = testUsers[0]
+    const token = helpers.makeAuthHeader(testUser)
 
     before('make knex instance', () => {
         db = knex({
@@ -41,7 +42,7 @@ describe(` Meals Endpoints`, () => {
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
                     .get('/api/meals')
-                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .set(`Authorization`, token)
                     .expect(200, {})
             })
         })
@@ -66,7 +67,7 @@ describe(` Meals Endpoints`, () => {
             it(`responds with 200 and all of the meals`, () => {
                 return supertest(app)
                     .get(`/api/meals`)
-                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .set(`Authorization`, token)
                     .expect(200, mealsOutput)
             })
         })
@@ -83,7 +84,7 @@ describe(` Meals Endpoints`, () => {
             it('responds with 200 and an empty list', () => {
                 return supertest(app)
                     .get('/api/meals/user')
-                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .set(`Authorization`, token)
                     .expect(200, {})
             })
         })
@@ -109,7 +110,7 @@ describe(` Meals Endpoints`, () => {
             it(`responds with 200 and all the user meals`, () => {
                 return supertest(app)
                     .get(`/api/meals/user`)
-                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .set(`Authorization`, token)
                     .expect(200)
                     .expect(res => {
                         db
@@ -143,7 +144,7 @@ describe(` Meals Endpoints`, () => {
                 const mealId = 123
                 return supertest(app)
                     .get(`/api/meals/${mealId}`)
-                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .set(`Authorization`, token)
                     .expect(404, { error: { message: `Meal doesn't exist` } })
             })
         })
@@ -170,8 +171,13 @@ describe(` Meals Endpoints`, () => {
             
                 return supertest(app)
                     .get(`/api/meals/${mealId}`)
-                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
-                    .expect(200, expectedMeal)
+                    .set(`Authorization`, token)
+                    .expect(200)
+                    .then( (res) => {
+                        expect(res.body.day).to.eql(expectedMeal.day)
+                        expect(res.body.recipe_id).to.eql(expectedMeal.recipe_id)
+                        expect(res.body.user_id).to.eql(expectedMeal.user_id)
+                    })
             })
         })
     })
@@ -188,7 +194,7 @@ describe(` Meals Endpoints`, () => {
                 })
         })
 
-        it ('creates a meal, responding with 201 and the new meal', () => {
+        it('creates a meal, responding with 201 and the new meal', () => {
             const newMeal = {
                 day: 'Saturday',
                 recipe_id: 2
@@ -196,13 +202,12 @@ describe(` Meals Endpoints`, () => {
             
             return supertest(app)
                 .post('/api/meals')
-                .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                .set(`Authorization`, token)
                 .send(newMeal)
                 .expect(201)
                 .expect(res => {
                     expect(res.body.day).to.eql(newMeal.day)
                     expect(res.body.recipe_id).to.eql(newMeal.recipe_id)
-                    expect(res.body.user_id).to.eql(testUser.id)
                     expect(res.body).to.have.property('id')
                     expect(res.headers.location).to.eql(`/api/meals/${res.body.id}`)
                 })
@@ -215,7 +220,6 @@ describe(` Meals Endpoints`, () => {
         })
 
         const token = helpers.makeAuthHeader(testUser)
-
         const requiredFields = ['day', 'recipe_id']
 
         // requiredFields.forEach(field => {
@@ -223,27 +227,27 @@ describe(` Meals Endpoints`, () => {
         //         day: 'Test title',
         //         recipe_id: 1
         //     }
-        for (let field of requiredFields) {
-            const newMeal = {
-                day: 'Test title',
-                recipe_id: 1
+            for (let field of requiredFields) {
+                const newMeal = {
+                    day: 'Test title',
+                    recipe_id: 1
+                }
+            
+                it.skip(`responds with 400 and an error message when '${field}' is missing`, () => {
+                    delete newMeal[field]
+                    // console.log(`NEW MEAL`, newMeal)
+                    // console.log(`TOKEN`, token)
+                    return supertest(app)
+                        .post('/api/meals')
+                        .set(`Authorization`, token)
+                        .send(newMeal)
+                        .expect(400, {
+                            error: { message: `Missing '${field}' in request body` }
+                        })
+                })          
             }
-        
-
-            it.only(`responds with 400 and an error message when '${field}' is missing`, () => {
-                delete newMeal[field]
-                console.log(`NEW MEAL`, newMeal)
-                console.log(`TOKEN`, token)
-                return supertest(app)
-                    .post('/api/meals')
-                    .set(`Authorization`, token)
-                    .send(newMeal)
-                    .expect(400, {
-                        error: { message: `Missing '${field}' in request body` }
-                    })
-            })
-        }
         // })
+
     })
 
 
@@ -263,7 +267,7 @@ describe(` Meals Endpoints`, () => {
                 const mealId = 10
                 return supertest(app)
                     .delete(`/api/meals/${mealId}`)
-                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .set(`Authorization`, token)
                     .expect(404, { error: { message: `Meal doesn't exist` } })
             })
         })
@@ -294,12 +298,12 @@ describe(` Meals Endpoints`, () => {
 
                 return supertest(app)
                     .delete(`/api/meals/${idToRemove}`)
-                    .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                    .set(`Authorization`, token)
                     .expect(204)
                     .then(res =>
                         supertest(app)
                         .get(`/api/meals`)
-                        .set(`Authorization`, helpers.makeAuthHeader(testUsers[0]))
+                        .set(`Authorization`, token)
                         .expect(expectedMeals)
                     )
             })

@@ -92,7 +92,7 @@ describe(`Users Endpoints`, () => {
             })
 
             it('responds with 200 and the specified user', () => {
-                const userId = 1
+                const userId = 2
                 const expectedUser = testUsers.find(user => user.id === userId)
                 return supertest(app)
                     .get(`/api/users/${userId}`)

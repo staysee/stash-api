@@ -4,21 +4,25 @@ const jwt = require('jsonwebtoken')
 function makeMealsArray() {
     return [
         {
+            id: 1,
             day: 'Monday',
             recipe_id: 1,
             user_id: 1
         },
         {
+            id: 2,
             day: 'Tuesday',
             recipe_id: 2,
             user_id: 1
         },
         {
+            id: 3,
             day: 'Tuesday',
             recipe_id: 3,
             user_id: 1
         },
         {
+            id: 4,
             day: 'Wednesday',
             recipe_id: 1,
             user_id: 1
@@ -43,6 +47,7 @@ function makeMealsObject() {
 function makeRecipesArray() {
     return [
         {
+            id: 1, 
             title: 'First Test Recipe',
             ingredients: 'Some test ingredients',
             instructions: 'Some test instructions',
@@ -52,6 +57,7 @@ function makeRecipesArray() {
             user_id: 1
         },
         {
+            id: 2,
             title: 'Second Test Recipe',
             ingredients: 'Some test ingredients',
             instructions: 'Some test instructions',
@@ -61,6 +67,7 @@ function makeRecipesArray() {
             user_id: 2
         },
         {
+            id: 3,
             title: 'Third Test Recipe',
             ingredients: 'Some test ingredients',
             instructions: 'Some test instructions',
@@ -102,25 +109,29 @@ function makeMaliciousRecipe() {
 function makeUsersArray(){
     return [
         {
+            id: 1,
             username: 'janedoe',
             firstname: 'Jane',
             lastname: 'Doe',
             password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e',
+            date_created: new Date('2020-11-06T18:57:52.458Z')
            
         },
         {
+            id: 2,
             username: 'johndoe',
             firstname: 'John',
             lastname: 'Doe',
             password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e',
-     
+            date_created: new Date('2020-11-06T18:57:52.458Z')
         },
         {
+            id: 3,
             username: 'testuser',
             firstname: 'Test',
             lastname: 'User',
             password: '$2a$12$q3DQscKiujn6z1os6r.mBO2Ijg2pTPMMR20VA6xyLM4mHrfxn591e',
-            
+            date_created: new Date('2020-11-06T18:57:52.458Z')
         }
     ]
 }

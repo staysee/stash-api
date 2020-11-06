@@ -215,6 +215,7 @@ describe('Recipes Endpoints', function() {
         it('creates a recipe, responding with 201 and the new recipe', () => {
             this.retries(3)
             const newRecipe = {
+                id: 1,
                 title: 'Test new recipe',
                 ingredients: 'Test ingredients',
                 instructions: 'Test instructions',
@@ -230,6 +231,7 @@ describe('Recipes Endpoints', function() {
                 .expect(201)
                 .expect( res => {
                     // console.log(`RES`, res.body)
+                    expect(res.body.id).to.eql(newRecipe.id)
                     expect(res.body.title).to.eql(newRecipe.title)
                     expect(res.body.ingredients).to.eql(newRecipe.ingredients)
                     expect(res.body.instructions).to.eql(newRecipe.instructions)
