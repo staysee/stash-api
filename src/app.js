@@ -17,20 +17,19 @@ const morganOption = (NODE_ENV === 'production')
     : 'common'
 
 const allowedOrigins = ['http://localhost:3000', 'https://stash.staysee.vercel.app']
+const corsOptionsDelegate = function (req, callback) {
+    let corsOptions;
+    if (allowedOrigins.indexOf(req.header('Origin')) !== -1) {
+        corsOptions = { origin: true }
+    } else {
+        corsOptions = { origin: false }
+    }
+    callback(null, corsOptions)
+}
 
 app.use(morgan(morganOption))
 app.use(helmet())
-app.use(cors({
-    origin: function(original, callback) {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-
-            return callback(new Error(msg), false);
-        }
-        return callback(null, true);
-    }
-}))
+app.use(cors(corsOptionsDelegate))
 app.use(express.json())
 
 app.use('/api/recipes', recipesRouter)
