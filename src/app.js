@@ -3,7 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
-const { CLIENT_ORIGIN, NODE_ENV } = require('./config');
+const { NODE_ENV } = require('./config');
 
 const recipesRouter = require('./recipes/recipes-router');
 const mealsRouter = require('./meals/meals-router');
@@ -41,7 +41,7 @@ app.get('/', (req, res) => {
   res.send('Hello, world!');
 });
 
-app.use((error, req, res, next) => {
+app.use((error, req, res) => {
   let response;
   if (NODE_ENV === 'production') {
     response = { error: { message: 'server error' } };

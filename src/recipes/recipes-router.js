@@ -1,8 +1,6 @@
 const path = require('path');
 const express = require('express');
-const { v4: uuid } = require('uuid');
 const logger = require('../logger');
-const { end } = require('../logger');
 const RecipesService = require('./recipes-service');
 const { requireAuth } = require('../middleware/jwt-auth');
 
@@ -88,7 +86,7 @@ recipesRouter
     return RecipesService.deleteRecipe(knexInstance, req.params.id)
       .then(() => res.status(204).json({ message: `Recipe with id ${req.params.id} was deleted.` }))
       .catch(next);
-    logger.info(`Recipe with id ${id} deleted.`);
+    logger.info(`Recipe with id ${req.params.id} deleted.`);
   })
   .patch(jsonParser, (req, res, next) => {
     const {

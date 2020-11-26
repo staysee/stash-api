@@ -11,5 +11,13 @@
         "ecmaVersion": 12
     },
     "rules": {
+        "consistent-return": 0,
+        "camelcase": 0,
+        "no-restricted-syntax": 0,
+        "no-shadow": 1,
+        "no-unreachable": 1,
+        "no-unused-vars": 1,
+        "no-useless-escape": 1,
+        "prefer-const": 1
     }
 }

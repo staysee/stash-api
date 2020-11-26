@@ -81,7 +81,7 @@ usersRouter
       })
       .catch(next);
   })
-  .get((req, res, next) => {
+  .get((req, res) => {
     res.json(res.user);
   })
   .delete((req, res, next) => {
