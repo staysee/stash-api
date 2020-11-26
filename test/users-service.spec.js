@@ -36,10 +36,8 @@ describe('Users Service object', () => {
           .insert(testMeals))));
 
     it('getAllUsers() from \'users\' table', () =>
-    // console.log(`users here:`, testUsers)
       UsersService.getAllUsers(db)
         .then((actual) => {
-          // console.log(`ACTUAL`, actual)
           expect(actual).to.eql(testUsers);
         }));
 

@@ -85,7 +85,6 @@ describe('Users Endpoints', () => {
           .set('Authorization', helpers.makeAuthHeader(testUser))
           .expect(200)
           .expect((res) => {
-            // console.log(`RES`, res.body)
             expect(res.body.username).to.eql(expectedUser.username);
             expect(res.body.firstname).to.eql(expectedUser.firstname);
             expect(res.body.lastname).to.eql(expectedUser.lastname);
@@ -218,14 +217,6 @@ describe('Users Endpoints', () => {
           .expect((res) => {
             console.log('RES', res.body);
             expect(res.body).to.have.property('authToken');
-            // expect(res.body.username).to.eql(newUser.username)
-            // expect(res.body.firstname).to.eql(newUser.firstname)
-            // expect(res.body.lastname).to.eql(newUser.lastname)
-            // expect(res.body).to.not.have.property('password')
-            // expect(res.headers.location).to.eql(`/api/users/${res.body.id}`)
-            // const expectedDate = new Date().toLocaleString('en', { timeZone: 'UTC'})
-            // const actualDate = new Date(res.body.date_created).toLocaleString()
-            // expect(actualDate).to.eql(expectedDate)
           })
           .expect((res) => db
             .from('users')

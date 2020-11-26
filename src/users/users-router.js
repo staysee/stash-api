@@ -47,7 +47,6 @@ usersRouter
               password: hashedPassword,
               firstname,
               lastname,
-              // date_created: 'now()'
             };
 
             return UsersService.insertUser(

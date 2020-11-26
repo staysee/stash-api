@@ -74,7 +74,7 @@ recipesRouter
             error: { message: 'Recipe doesn\'t exist' },
           });
         }
-        res.recipe = recipe; // save the recipe for the next middleware
+        res.recipe = recipe;
         next();
       })
       .catch(next);

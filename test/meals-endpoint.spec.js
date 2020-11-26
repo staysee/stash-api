@@ -179,11 +179,6 @@ describe(' Meals Endpoints', () => {
     const token = helpers.makeAuthHeader(testUser);
     const requiredFields = ['day', 'recipe_id'];
 
-    // requiredFields.forEach(field => {
-    //     const newMeal = {
-    //         day: 'Test title',
-    //         recipe_id: 1
-    //     }
     for (const field of requiredFields) {
       const newMeal = {
         day: 'Test title',
@@ -192,8 +187,7 @@ describe(' Meals Endpoints', () => {
 
       it.skip(`responds with 400 and an error message when '${field}' is missing`, () => {
         delete newMeal[field];
-        // console.log(`NEW MEAL`, newMeal)
-        // console.log(`TOKEN`, token)
+
         return supertest(app)
           .post('/api/meals')
           .set('Authorization', token)
@@ -203,7 +197,6 @@ describe(' Meals Endpoints', () => {
           });
       });
     }
-    // })
   });
 
   describe('DELETE /api/meals/:id', () => {
