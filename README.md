@@ -1,7 +1,9 @@
 # STASH-API!
 
 This is the api for STASH.
-Created using the express-boilerplate.
+
+## API Documentation
+(https://documenter.getpostman.com/view/5109644/TVmHDexk)
 
 # Create Database
 `createdb -U {username} {database name}`
