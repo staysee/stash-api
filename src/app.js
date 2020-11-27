@@ -16,7 +16,7 @@ const morganOption = (NODE_ENV === 'production')
     ? 'tiny' 
     : 'common'
 
-const allowedOrigins = ['http://localhost:3000', 'https://stash.staysee.vercel.app']
+const allowedOrigins = ['http://localhost:3000', 'https://stash.staysee.vercel.app', 'https://stash-zeta.vercel.app']
 const corsOptionsDelegate = function (req, callback) {
     let corsOptions;
     if (allowedOrigins.indexOf(req.header('Origin')) !== -1) {
