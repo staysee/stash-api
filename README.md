@@ -1,4 +1,4 @@
-# STASH-API!
+# STASH-API
 
 This is the api for STASH.
 
